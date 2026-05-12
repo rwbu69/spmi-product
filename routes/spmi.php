@@ -18,6 +18,7 @@ use App\Http\Controllers\Pelaksanaan\PengaturanPeriodeController;
 use App\Http\Controllers\Pelaksanaan\TargetNilaiMutuController;
 use App\Http\Controllers\Penetapan\NilaiMutuController;
 use App\Http\Controllers\Penetapan\StandarMutuController;
+use App\Http\Controllers\Penetapan\IndikatorController;
 use App\Http\Controllers\Referensi\AuditeeController;
 use App\Http\Controllers\Referensi\AuditeePusatController;
 use App\Http\Controllers\Referensi\LembagaAkreditasiController;
