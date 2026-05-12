@@ -21,18 +21,18 @@ defineProps<{
         </div>
 
         <div class="w-full max-w-4xl bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row relative z-10 border border-gray-100">
-            
+
             <!-- Left Side -->
             <div class="w-full md:w-[45%] bg-gradient-to-b from-gray-50 to-white p-10 flex flex-col items-center justify-center border-b md:border-b-0 md:border-r border-gray-100 relative overflow-hidden">
                 <AppLogoIcon class="size-32 text-blue-700 mb-6 drop-shadow-sm" />
-                
-                <h2 class="text-xl font-bold tracking-tight text-gray-900 text-center uppercase">STTII YOGYAKARTA</h2>
+
+                <h2 class="text-xl font-bold tracking-tight text-gray-900 text-center uppercase">Nama Universitas</h2>
                 <p class="text-sm font-medium text-gray-500 mt-2 text-center">Sistem Penjaminan Mutu Internal</p>
             </div>
-            
+
             <!-- Right Side -->
             <div class="w-full md:w-[55%] p-8 md:p-12 bg-white flex flex-col justify-center relative">
-                
+
                 <div class="flex flex-col space-y-1.5 mb-8 text-center">
                     <h1 class="text-2xl font-bold tracking-tight text-gray-900">Selamat Datang</h1>
                     <p class="text-sm text-gray-500">Silakan masuk ke akun Anda</p>
@@ -43,9 +43,9 @@ defineProps<{
                 </div>
             </div>
         </div>
-        
+
         <div class="mt-8 text-center text-xs font-medium text-gray-400 relative z-10">
-            STTII Yogyakarta &copy; {{ new Date().getFullYear() }}
+            Nama Universitas &copy; {{ new Date().getFullYear() }}
         </div>
     </div>
 </template>
