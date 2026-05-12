@@ -14,20 +14,9 @@ export function updateTheme(value: Appearance): void {
     if (typeof window === 'undefined') {
         return;
     }
-
-    if (value === 'system') {
-        const mediaQueryList = window.matchMedia(
-            '(prefers-color-scheme: dark)',
-        );
-        const systemTheme = mediaQueryList.matches ? 'dark' : 'light';
-
-        document.documentElement.classList.toggle(
-            'dark',
-            systemTheme === 'dark',
-        );
-    } else {
-        document.documentElement.classList.toggle('dark', value === 'dark');
-    }
+    
+    // Force light theme entirely
+    document.documentElement.classList.remove('dark');
 }
 
 const setCookie = (name: string, value: string, days = 365) => {
@@ -57,11 +46,7 @@ const getStoredAppearance = () => {
 };
 
 const prefersDark = (): boolean => {
-    if (typeof window === 'undefined') {
-        return false;
-    }
-
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return false; // Forced light mode
 };
 
 const handleSystemThemeChange = () => {
@@ -97,11 +82,7 @@ export function useAppearance(): UseAppearanceReturn {
     });
 
     const resolvedAppearance = computed<ResolvedAppearance>(() => {
-        if (appearance.value === 'system') {
-            return prefersDark() ? 'dark' : 'light';
-        }
-
-        return appearance.value;
+        return 'light';
     });
 
     function updateAppearance(value: Appearance) {
