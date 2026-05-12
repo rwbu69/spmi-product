@@ -27,7 +27,7 @@ const notifications = computed(() => page.props.notifications || []);
                 </div>
                 <div class="hidden sm:block pointer-events-none">
                     <h1 class="text-sm font-bold leading-tight">Sistem Informasi Penjaminan Mutu Internal</h1>
-                    <p class="text-xs text-blue-200">STTII Yogyakarta</p>
+                    <p class="text-xs text-blue-200">Nama Universitas</p>
                 </div>
             </div>
         </div>
@@ -66,7 +66,7 @@ const notifications = computed(() => page.props.notifications || []);
                     </div>
                 </DropdownMenuContent>
             </DropdownMenu>
-            
+
             <DropdownMenu>
                 <DropdownMenuTrigger class="flex items-center gap-2 hover:bg-blue-700 px-2 py-1.5 rounded-full transition outline-none">
                     <UserInfo :user="user" />
