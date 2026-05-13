@@ -25,22 +25,22 @@ const passwordInput = useTemplateRef('passwordInput');
     <div class="space-y-6">
         <Heading
             variant="small"
-            title="Delete account"
-            description="Delete your account and all of its resources"
+            title="Hapus Akun"
+            description="Hapus akun dan semua data terkait secara permanen"
         />
         <div
             class="space-y-4 rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-200/10 dark:bg-red-700/10"
         >
             <div class="relative space-y-0.5 text-red-600 dark:text-red-100">
-                <p class="font-medium">Warning</p>
+                <p class="font-medium">Peringatan</p>
                 <p class="text-sm">
-                    Please proceed with caution, this cannot be undone.
+                    Harap lanjutkan dengan hati-hati, tindakan ini tidak dapat dibatalkan.
                 </p>
             </div>
             <Dialog>
                 <DialogTrigger as-child>
                     <Button variant="destructive" data-test="delete-user-button"
-                        >Delete account</Button
+                        >Hapus Akun</Button
                     >
                 </DialogTrigger>
                 <DialogContent>
@@ -56,15 +56,14 @@ const passwordInput = useTemplateRef('passwordInput');
                     >
                         <DialogHeader class="space-y-3">
                             <DialogTitle
-                                >Are you sure you want to delete your
-                                account?</DialogTitle
+                                >Apakah Anda yakin ingin menghapus
+                                akun ini?</DialogTitle
                             >
                             <DialogDescription>
-                                Once your account is deleted, all of its
-                                resources and data will also be permanently
-                                deleted. Please enter your password to confirm
-                                you would like to permanently delete your
-                                account.
+                                Setelah akun dihapus, semua data dan resource
+                                terkait akan ikut dihapus secara permanen.
+                                Masukkan kata sandi Anda untuk mengonfirmasi
+                                penghapusan akun.
                             </DialogDescription>
                         </DialogHeader>
 
@@ -76,7 +75,7 @@ const passwordInput = useTemplateRef('passwordInput');
                                 id="password"
                                 name="password"
                                 ref="passwordInput"
-                                placeholder="Password"
+                                placeholder="Kata sandi"
                             />
                             <InputError :message="errors.password" />
                         </div>
@@ -92,7 +91,7 @@ const passwordInput = useTemplateRef('passwordInput');
                                         }
                                     "
                                 >
-                                    Cancel
+                                    Batal
                                 </Button>
                             </DialogClose>
 
@@ -102,7 +101,7 @@ const passwordInput = useTemplateRef('passwordInput');
                                 :disabled="processing"
                                 data-test="confirm-delete-user-button"
                             >
-                                Delete account
+                                Hapus Akun
                             </Button>
                         </DialogFooter>
                     </Form>

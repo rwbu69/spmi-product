@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Auditee;
+use App\Models\EvaluasiDiri;
+use App\Models\LaporanAmi;
 use App\Models\LembagaAkreditasi;
 use App\Models\NilaiMutu;
 use App\Models\PengaturanPeriode;
@@ -16,24 +18,27 @@ class BerandaController extends Controller
 {
     public function index(Request $request): Response
     {
+        // ── Beranda khusus Auditor ────────────────────────────────
+        if (auth()->user()?->hasRole('Auditor')) {
+            return $this->indexAuditor();
+        }
+
+        // ── Beranda default (Admin, Fakultas, Auditee) ────────────
         $tahunList    = TahunPeriode::orderByDesc('tahun')->get(['id', 'tahun', 'status']);
         $lembagaList  = LembagaAkreditasi::orderBy('nama_lembaga')->get(['id', 'nama_lembaga']);
         $auditeeList  = Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']);
 
-        // Filters
         $filterTahun   = $request->integer('tahun_id');
         $filterLembaga = $request->integer('lembaga_id');
         $filterAuditee = $request->integer('auditee_id');
         $filterJenis   = $request->string('jenis');
 
-        // Summary counts
         $totalAuditee = Auditee::count();
         $totalLembaga = LembagaAkreditasi::count();
         $totalStandar = StandarMutu::where('level', 1)
             ->when($filterLembaga, fn ($q) => $q->where('lembaga_akreditasi_id', $filterLembaga))
             ->count();
 
-        // Chart data: rata-rata nilai mutu per auditee
         $chartQuery = NilaiMutu::with(['auditee:id,nama_auditee', 'pengaturanPeriode.tahunPeriode'])
             ->when($filterTahun, function ($q) use ($filterTahun) {
                 $q->whereHas('pengaturanPeriode', fn ($q2) => $q2->where('tahun_periode_id', $filterTahun));
@@ -44,8 +49,8 @@ class BerandaController extends Controller
         $nilaiData = $chartQuery->get()
             ->groupBy('auditee_id')
             ->map(fn ($group) => [
-                'auditee'      => $group->first()->auditee->nama_auditee ?? '-',
-                'rata_nilai'   => round($group->avg('nilai'), 2),
+                'auditee'    => $group->first()->auditee->nama_auditee ?? '-',
+                'rata_nilai' => round($group->avg('nilai'), 2),
             ])
             ->values();
 
@@ -67,4 +72,40 @@ class BerandaController extends Controller
             ],
         ]);
     }
+
+    private function indexAuditor(): Response
+    {
+        // Total evaluasi_diri yang terdaftar
+        $totalEvaluasiDiri = EvaluasiDiri::count();
+
+        // Sudah Desk Evaluation = evaluasi_diri yang punya minimal 1 record desk_evaluation
+        $sudahDeskEval = EvaluasiDiri::whereHas('deskEvaluasi')->count();
+
+        // Belum Desk Evaluation = sisanya
+        $belumDeskEval = $totalEvaluasiDiri - $sudahDeskEval;
+
+        // Total auditee yang punya evaluasi_diri aktif (via periode aktif)
+        $totalAuditeeAktif = EvaluasiDiri::whereHas('pengaturanPeriode', fn ($q) =>
+            $q->where('status', 'Aktif')
+        )->count();
+
+        // Sudah Visitasi = auditee yang sudah punya laporan_ami
+        $sudahVisitasi = LaporanAmi::distinct('auditee_id')->count('auditee_id');
+
+        // Belum Visitasi = evaluasi_diri aktif yang auditee-nya belum punya laporan_ami
+        $auditeeIdsWithLaporan = LaporanAmi::distinct()->pluck('auditee_id');
+        $belumVisitasi = EvaluasiDiri::whereHas('pengaturanPeriode', fn ($q) =>
+            $q->where('status', 'Aktif')
+        )->whereNotIn('auditee_id', $auditeeIdsWithLaporan)->count();
+
+        return Inertia::render('Beranda/Auditor', [
+            'stats' => [
+                'belum_desk_eval' => $belumDeskEval,
+                'sudah_desk_eval' => $sudahDeskEval,
+                'belum_visitasi'  => $belumVisitasi,
+                'sudah_visitasi'  => $sudahVisitasi,
+            ],
+        ]);
+    }
 }
+
