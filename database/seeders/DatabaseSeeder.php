@@ -18,23 +18,23 @@ class DatabaseSeeder extends Seeder
     {
         $now = Carbon::now();
 
-        // Users
+        // Pastikan roles sudah ada sebelum assign
+        $this->call(RoleSeeder::class);
+
+        // Buat user Admin utama
         $user = User::firstOrCreate(
-            ['username' => 'superadmin'],
+            ['username' => 'admin'],
             [
-                'name' => 'Admin SPMI',
-                'email' => 'login@test.com',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
+                'name'               => 'Admin SPMI',
+                'email'              => 'admin@spmi.com',
+                'password'           => Hash::make('password'),
+                'email_verified_at'  => now(),
             ]
         );
+        $user->syncRoles(['Admin']);
 
-        $this->call([
-            RoleSeeder::class,
-            UserSeeder::class,
-        ]);
-
-        $user->assignRole('Administrator');
+        // Seed user Auditor dan Auditee contoh
+        $this->call(UserSeeder::class);
 
         // Tahun Periode
         $tahunId = DB::table('tahun_periode')->insertGetId([
