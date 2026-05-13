@@ -8,7 +8,7 @@ interface PaginationLink {
     active: boolean;
 }
 
-const props = defineProps<{
+defineProps<{
     links: PaginationLink[];
     total?: number;
     from?: number;
@@ -16,12 +16,16 @@ const props = defineProps<{
 }>();
 
 // Label pertama = Previous, label terakhir = Next (dari Laravel paginator)
-const isPrev  = (link: PaginationLink) => link.label.includes('Previous') || link.label.includes('&laquo;') || link.label === 'pagination.previous';
-const isNext  = (link: PaginationLink) => link.label.includes('Next')     || link.label.includes('&raquo;') || link.label === 'pagination.next';
-const isPage  = (link: PaginationLink) => !isPrev(link) && !isNext(link);
+const isPrev = (link: PaginationLink) =>
+    link.label.includes('Previous') || link.label.includes('&laquo;') || link.label === 'pagination.previous';
+const isNext = (link: PaginationLink) =>
+    link.label.includes('Next') || link.label.includes('&raquo;') || link.label === 'pagination.next';
+const isPage = (link: PaginationLink) => !isPrev(link) && !isNext(link);
 
 const go = (url: string | null) => {
-    if (url) router.get(url, {}, { preserveState: true, preserveScroll: true });
+    if (url) {
+        router.get(url, {}, { preserveState: true, preserveScroll: true });
+    }
 };
 </script>
 
@@ -39,7 +43,7 @@ const go = (url: string | null) => {
         <!-- Kanan: tombol navigasi -->
         <div class="flex items-center gap-1">
             <!-- Previous -->
-            <template v-for="link in links" :key="link.label">
+            <template v-for="link in links" :key="'prev-' + link.label">
                 <button
                     v-if="isPrev(link)"
                     type="button"
@@ -56,12 +60,12 @@ const go = (url: string | null) => {
             </template>
 
             <!-- Page numbers -->
-            <template v-for="link in links" :key="link.label">
+            <template v-for="link in links" :key="'page-' + link.label">
                 <button
                     v-if="isPage(link)"
                     type="button"
                     :disabled="!link.url"
-                    class="min-w-[2rem] rounded-md px-2 py-1 text-center transition"
+                    class="min-w-8 rounded-md px-2 py-1 text-center transition"
                     :class="[
                         link.active
                             ? 'bg-blue-600 font-semibold text-white'
@@ -76,7 +80,7 @@ const go = (url: string | null) => {
             </template>
 
             <!-- Next -->
-            <template v-for="link in links" :key="link.label">
+            <template v-for="link in links" :key="'next-' + link.label">
                 <button
                     v-if="isNext(link)"
                     type="button"

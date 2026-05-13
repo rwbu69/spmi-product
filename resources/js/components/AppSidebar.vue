@@ -333,7 +333,7 @@ const navGroups = computed<NavGroup[]>(() => {
         >
             <div
                 v-if="hoveredGroup && state === 'collapsed'"
-                class="fixed z-[100] w-56 flex-col rounded-lg bg-[#2d2d2d] p-2 text-sm shadow-xl border border-[#3d3d3d] pointer-events-auto origin-left"
+                class="fixed z-100 w-56 flex-col rounded-lg bg-[#2d2d2d] p-2 text-sm shadow-xl border border-[#3d3d3d] pointer-events-auto origin-left"
                 :style="flyoutStyle"
                 @mouseenter="keepFlyout"
                 @mouseleave="hideFlyout"

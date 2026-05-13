@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { Edit2, Plus, Search, Trash2 } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
@@ -164,7 +164,7 @@ const confirmDelete = () => {
                         <td class="px-4 py-3 text-gray-500">{{ (data.current_page - 1) * data.per_page + i + 1 }}</td>
                         <td class="px-4 py-3 font-medium text-gray-900 ">{{ item.nama_lembaga }}</td>
                         <td class="px-4 py-3 text-gray-500">
-                            <div class="max-w-[300px] whitespace-normal break-words text-xs">
+                            <div class="max-w-75 whitespace-normal wrap-break-word text-xs">
                                 {{ item.keterangan || '-' }}
                             </div>
                         </td>

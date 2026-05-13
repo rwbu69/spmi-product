@@ -18,26 +18,26 @@ const notifications = computed(() => page.props.notifications || []);
 </script>
 
 <template>
-    <header class="flex h-16 shrink-0 items-center justify-between border-b border-blue-700 bg-blue-600 text-white px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4 shadow-sm">
+    <header class="flex h-16 shrink-0 items-center justify-between border-b border-[#5bbac3] bg-[#76D2DB] text-gray-800 px-6 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 md:px-4 shadow-sm">
         <div class="flex items-center gap-4">
-            <SidebarTrigger class="-ml-1 text-white hover:bg-blue-700 hover:text-white" />
+            <SidebarTrigger class="-ml-1 text-gray-700 hover:bg-[#5bbac3]/40 hover:text-gray-900" />
             <div class="flex items-center gap-3">
                 <div class="pointer-events-none">
                     <AppLogo class="hidden md:block" />
                 </div>
                 <div class="hidden sm:block pointer-events-none">
-                    <h1 class="text-sm font-bold leading-tight">Sistem Informasi Penjaminan Mutu Internal</h1>
-                    <p class="text-xs text-blue-200">Nama Universitas</p>
+                    <h1 class="text-sm font-bold leading-tight text-gray-900">Sistem Informasi Penjaminan Mutu Internal</h1>
+                    <p class="text-xs text-gray-600">Nama Universitas</p>
                 </div>
             </div>
         </div>
         <div class="flex items-center gap-6">
-            <span class="text-sm font-medium">Periode Aktif : 2025</span>
+            <span class="text-sm font-medium text-gray-800">Periode Aktif : 2025</span>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
-                    <button class="relative p-2 hover:bg-blue-700 rounded-full transition outline-none">
-                        <Bell class="size-5 text-white" />
-                        <span v-if="notifications.length" class="absolute right-2 top-2 size-2 rounded-full bg-red-400 border-2 border-blue-600"></span>
+                    <button class="relative p-2 hover:bg-[#5bbac3]/40 rounded-full transition outline-none">
+                        <Bell class="size-5 text-gray-700" />
+                        <span v-if="notifications.length" class="absolute right-2 top-2 size-2 rounded-full bg-red-500 border-2 border-[#76D2DB]"></span>
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" class="w-80 mt-2 p-0 border-gray-100 shadow-xl overflow-hidden rounded-xl">
@@ -68,9 +68,9 @@ const notifications = computed(() => page.props.notifications || []);
             </DropdownMenu>
 
             <DropdownMenu>
-                <DropdownMenuTrigger class="flex items-center gap-2 hover:bg-blue-700 px-2 py-1.5 rounded-full transition outline-none">
+                <DropdownMenuTrigger class="flex items-center gap-2 hover:bg-[#5bbac3]/40 px-2 py-1.5 rounded-full transition outline-none">
                     <UserInfo :user="user" />
-                    <ChevronDown class="size-4 opacity-70" />
+                    <ChevronDown class="size-4 opacity-70 text-gray-700" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" class="w-56 mt-2 border-gray-100 shadow-lg">
                     <UserMenuContent :user="user" />
