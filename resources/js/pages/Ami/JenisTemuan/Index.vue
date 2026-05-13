@@ -106,16 +106,19 @@ const confirmDelete = () => {
             <div>
                 <label class="block text-sm font-medium mb-1">Nama Jenis Temuan <span class="text-red-500">*</span></label>
                 <input v-model="form.nama" type="text" placeholder="Contoh: Kesesuaian / Observasi" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.nama" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Status Findings <span class="text-red-500">*</span></label>
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input v-model="form.status" type="radio" value="Positif" class="text-green-600 focus:ring-green-500" />
+                <p v-if="form.errors.status" class="text-[11px] text-red-500 mt-1">{{ form.errors.status }}</p>
                         <span class="text-sm font-medium text-green-700">Positif (Kesesuaian)</span>
                     </label>
                     <label class="flex items-center gap-2 cursor-pointer">
                         <input v-model="form.status" type="radio" value="Negatif" class="text-red-600 focus:ring-red-500" />
+                <p v-if="form.errors.status" class="text-[11px] text-red-500 mt-1">{{ form.errors.status }}</p>
                         <span class="text-sm font-medium text-red-700">Negatif (KTS/Penyimpangan)</span>
                     </label>
                 </div>

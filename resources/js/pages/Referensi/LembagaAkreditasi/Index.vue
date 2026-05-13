@@ -206,7 +206,7 @@ const confirmDelete = () => {
                 <input v-model="form.nama_lembaga" type="text" placeholder="Contoh: BAN-PT S1"
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.nama_lembaga ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.nama_lembaga" class="mt-1 text-xs text-red-500">{{ form.errors.nama_lembaga }}</p>
+                <p v-if="form.errors.nama_lembaga" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_lembaga }}</p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Keterangan</label>

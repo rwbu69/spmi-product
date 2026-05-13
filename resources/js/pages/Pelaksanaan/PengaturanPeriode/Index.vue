@@ -161,6 +161,7 @@ const formatDate = (date: string | null) => {
                         <option value="">Pilih Tahun</option>
                         <option v-for="t in tahunList" :key="t.id" :value="t.id">{{ t.tahun }}</option>
                     </select>
+                <p v-if="form.errors.tahun_periode_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.tahun_periode_id }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Lembaga Akreditasi <span class="text-red-500">*</span></label>
@@ -168,6 +169,7 @@ const formatDate = (date: string | null) => {
                         <option value="">Pilih Lembaga</option>
                         <option v-for="l in lembagaList" :key="l.id" :value="l.id">{{ l.nama_lembaga }}</option>
                     </select>
+                <p v-if="form.errors.lembaga_akreditasi_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.lembaga_akreditasi_id }}</p>
                 </div>
             </div>
 
@@ -178,26 +180,32 @@ const formatDate = (date: string | null) => {
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Mulai Evaluasi Diri</label>
                         <input v-model="form.mulai_evaluasi_diri" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.mulai_evaluasi_diri" class="text-[11px] text-red-500 mt-1">{{ form.errors.mulai_evaluasi_diri }}</p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Akhir Evaluasi Diri</label>
                         <input v-model="form.akhir_evaluasi_diri" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.akhir_evaluasi_diri" class="text-[11px] text-red-500 mt-1">{{ form.errors.akhir_evaluasi_diri }}</p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Mulai Desk Eval</label>
                         <input v-model="form.mulai_desk_eval" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.mulai_desk_eval" class="text-[11px] text-red-500 mt-1">{{ form.errors.mulai_desk_eval }}</p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Akhir Desk Eval</label>
                         <input v-model="form.akhir_desk_eval" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.akhir_desk_eval" class="text-[11px] text-red-500 mt-1">{{ form.errors.akhir_desk_eval }}</p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Mulai Visitasi</label>
                         <input v-model="form.mulai_visitasi" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.mulai_visitasi" class="text-[11px] text-red-500 mt-1">{{ form.errors.mulai_visitasi }}</p>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold uppercase text-gray-500 mb-1">Akhir Visitasi</label>
                         <input v-model="form.akhir_visitasi" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.akhir_visitasi" class="text-[11px] text-red-500 mt-1">{{ form.errors.akhir_visitasi }}</p>
                     </div>
                 </div>
             </div>
@@ -207,10 +215,12 @@ const formatDate = (date: string | null) => {
                 <div class="flex gap-4">
                     <label class="flex items-center gap-2">
                         <input v-model="form.status" type="radio" value="Aktif" />
+                <p v-if="form.errors.status" class="text-[11px] text-red-500 mt-1">{{ form.errors.status }}</p>
                         <span class="text-sm">Aktif</span>
                     </label>
                     <label class="flex items-center gap-2">
                         <input v-model="form.status" type="radio" value="Tidak Aktif" />
+                <p v-if="form.errors.status" class="text-[11px] text-red-500 mt-1">{{ form.errors.status }}</p>
                         <span class="text-sm">Tidak Aktif</span>
                     </label>
                 </div>

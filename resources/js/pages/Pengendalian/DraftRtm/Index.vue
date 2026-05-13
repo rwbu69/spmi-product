@@ -171,6 +171,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
             <div>
                 <label class="block text-sm font-medium mb-1">Nama Dokumen <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_dokumen" type="text" placeholder="Contoh: Draft RTM 2024" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.nama_dokumen" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_dokumen }}</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -179,6 +180,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <option value="">Pilih Auditee</option>
                         <option v-for="a in auditeeList" :key="a.id" :value="a.id">{{ a.nama_auditee }}</option>
                     </select>
+                <p v-if="form.errors.auditee_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Periode AMI <span class="text-red-500">*</span></label>
@@ -186,12 +188,14 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <option value="">Pilih Periode</option>
                         <option v-for="p in periodeList" :key="p.id" :value="p.id">{{ p.label }}</option>
                     </select>
+                <p v-if="form.errors.pengaturan_periode_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.pengaturan_periode_id }}</p>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Tanggal Buat <span class="text-red-500">*</span></label>
                     <input v-model="form.tanggal_dibuat" type="date" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.tanggal_dibuat" class="text-[11px] text-red-500 mt-1">{{ form.errors.tanggal_dibuat }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Status <span class="text-red-500">*</span></label>
@@ -199,6 +203,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <option value="Draft">Draft</option>
                         <option value="Final">Final</option>
                     </select>
+                <p v-if="form.errors.status" class="text-[11px] text-red-500 mt-1">{{ form.errors.status }}</p>
                 </div>
             </div>
             <div>

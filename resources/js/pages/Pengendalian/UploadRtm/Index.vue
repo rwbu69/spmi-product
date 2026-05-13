@@ -138,6 +138,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
             <div>
                 <label class="block text-sm font-medium mb-1">Nama Laporan <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_dokumen" type="text" placeholder="Contoh: Laporan RTM 2024 Final" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.nama_dokumen" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_dokumen }}</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
@@ -146,6 +147,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <option value="">Pilih Auditee</option>
                         <option v-for="a in auditeeList" :key="a.id" :value="a.id">{{ a.nama_auditee }}</option>
                     </select>
+                <p v-if="form.errors.auditee_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Tahun Periode <span class="text-red-500">*</span></label>
@@ -153,6 +155,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <option value="">Pilih Tahun</option>
                         <option v-for="t in tahunList" :key="t.id" :value="t.id">{{ t.tahun }}</option>
                     </select>
+                <p v-if="form.errors.tahun_periode_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.tahun_periode_id }}</p>
                 </div>
             </div>
             <div>

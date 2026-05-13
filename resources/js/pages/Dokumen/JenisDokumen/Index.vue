@@ -109,12 +109,12 @@ const confirmDelete = () => {
                     <option value="">-- Pilih Kategori --</option>
                     <option v-for="k in kategori" :key="k.id" :value="k.id">{{ k.nama_kategori }}</option>
                 </select>
-                <p v-if="form.errors.kategori_dokumen_id" class="mt-1 text-xs text-red-500">{{ form.errors.kategori_dokumen_id }}</p>
+                <p v-if="form.errors.kategori_dokumen_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.kategori_dokumen_id }}</p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Jenis <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_jenis" type="text" placeholder="Contoh: Kebijakan Akademik" class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " :class="form.errors.nama_jenis ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.nama_jenis" class="mt-1 text-xs text-red-500">{{ form.errors.nama_jenis }}</p>
+                <p v-if="form.errors.nama_jenis" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_jenis }}</p>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50  dark:text-gray-300 dark:hover:bg-gray-800" @click="closeForm">Batal</button>

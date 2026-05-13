@@ -120,6 +120,7 @@ const confirmDelete = () => {
             <div>
                 <label class="block text-sm font-medium mb-1">Nama Kategori <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_kategori" type="text" placeholder="Contoh: Mayor / Minor" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.nama_kategori" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_kategori }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Jenis Temuan Induk <span class="text-red-500">*</span></label>
@@ -127,6 +128,7 @@ const confirmDelete = () => {
                     <option value="">Pilih Jenis</option>
                     <option v-for="j in jenisList" :key="j.id" :value="j.id">{{ j.nama }}</option>
                 </select>
+                <p v-if="form.errors.jenis_temuan_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.jenis_temuan_id }}</p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">

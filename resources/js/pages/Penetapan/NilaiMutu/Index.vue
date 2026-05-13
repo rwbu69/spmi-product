@@ -174,6 +174,7 @@ const confirmDelete = () => {
                         <option value="">Pilih Periode</option>
                         <option v-for="p in periodeList" :key="p.id" :value="p.id">{{ p.label }}</option>
                     </select>
+                <p v-if="form.errors.pengaturan_periode_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.pengaturan_periode_id }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Lembaga <span class="text-red-500">*</span></label>
@@ -181,6 +182,7 @@ const confirmDelete = () => {
                         <option value="">Pilih Lembaga</option>
                         <option v-for="l in lembagaList" :key="l.id" :value="l.id">{{ l.nama_lembaga }}</option>
                     </select>
+                <p v-if="form.errors.lembaga_akreditasi_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.lembaga_akreditasi_id }}</p>
                 </div>
             </div>
             <div>
@@ -189,14 +191,17 @@ const confirmDelete = () => {
                     <option value="">Pilih Auditee</option>
                     <option v-for="a in auditeeList" :key="a.id" :value="a.id">{{ a.nama_auditee }}</option>
                 </select>
+                <p v-if="form.errors.auditee_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Nilai Akhir (Skor) <span class="text-red-500">*</span></label>
                 <input v-model="form.nilai" type="number" step="0.01" min="0" max="100" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.nilai" class="text-[11px] text-red-500 mt-1">{{ form.errors.nilai }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Catatan / Keterangan</label>
                 <textarea v-model="form.keterangan" rows="3" class="w-full rounded-lg border px-3 py-2 text-sm  "></textarea>
+                <p v-if="form.errors.keterangan" class="text-[11px] text-red-500 mt-1">{{ form.errors.keterangan }}</p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">

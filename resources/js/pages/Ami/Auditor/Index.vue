@@ -124,20 +124,22 @@ const confirmDelete = () => {
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Lengkap <span class="text-red-500">*</span></label>
                 <input v-model="form.nama" type="text" placeholder="Nama auditor..." class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " :class="form.errors.nama ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.nama" class="mt-1 text-xs text-red-500">{{ form.errors.nama }}</p>
+                <p v-if="form.errors.nama" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama }}</p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
                 <input v-model="form.email" type="email" placeholder="email@contoh.com" class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " :class="form.errors.email ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.email" class="mt-1 text-xs text-red-500">{{ form.errors.email }}</p>
+                <p v-if="form.errors.email" class="text-[11px] text-red-500 mt-1">{{ form.errors.email }}</p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">No. HP</label>
                 <input v-model="form.no_hp" type="text" placeholder="08xxxxxxxxxx" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " />
+                <p v-if="form.errors.no_hp" class="text-[11px] text-red-500 mt-1">{{ form.errors.no_hp }}</p>
             </div>
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Keahlian</label>
                 <input v-model="form.keahlian" type="text" placeholder="Bidang keahlian..." class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " />
+                <p v-if="form.errors.keahlian" class="text-[11px] text-red-500 mt-1">{{ form.errors.keahlian }}</p>
             </div>
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Keterangan</label>

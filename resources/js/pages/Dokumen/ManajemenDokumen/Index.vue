@@ -184,12 +184,13 @@ const getDownloadUrl = (item: ManajemenDokumen) => `/dokumen/manajemen/${item.id
             <div>
                 <label class="block text-sm font-medium mb-1">Nama Dokumen <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_dokumen" type="text" placeholder="Contoh: Laporan Kinerja 2024" class="w-full rounded-lg border px-3 py-2 text-sm  " />
-                <p v-if="form.errors.nama_dokumen" class="text-xs text-red-500 mt-1">{{ form.errors.nama_dokumen }}</p>
             </div>
+                <p v-if="form.errors.nama_dokumen" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_dokumen }}</p>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Tahun <span class="text-red-500">*</span></label>
                     <input v-model="form.tahun" type="number" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.tahun" class="text-[11px] text-red-500 mt-1">{{ form.errors.tahun }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Auditee <span class="text-red-500">*</span></label>
@@ -197,6 +198,7 @@ const getDownloadUrl = (item: ManajemenDokumen) => `/dokumen/manajemen/${item.id
                         <option value="">Pilih Auditee</option>
                         <option v-for="a in auditeeList" :key="a.id" :value="a.id">{{ a.nama_auditee }}</option>
                     </select>
+                <p v-if="form.errors.auditee_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
                 </div>
             </div>
             <div>
@@ -205,12 +207,12 @@ const getDownloadUrl = (item: ManajemenDokumen) => `/dokumen/manajemen/${item.id
                     <option value="">Pilih Jenis</option>
                     <option v-for="j in jenisList" :key="j.id" :value="j.id">[{{ j.kategori_dokumen.nama_kategori }}] {{ j.nama_jenis }}</option>
                 </select>
+                <p v-if="form.errors.jenis_dokumen_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.jenis_dokumen_id }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">File PDF <span v-if="!editTarget" class="text-red-500">*</span></label>
                 <input type="file" accept="application/pdf" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" @input="form.file = ($event.target as HTMLInputElement).files?.[0] || null" />
                 <p v-if="editTarget" class="text-[10px] text-gray-400 mt-1 italic">Kosongkan jika tidak ingin mengganti file.</p>
-                <p v-if="form.errors.file" class="text-xs text-red-500 mt-1">{{ form.errors.file }}</p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
