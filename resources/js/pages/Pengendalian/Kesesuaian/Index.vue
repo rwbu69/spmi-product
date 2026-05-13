@@ -2,9 +2,9 @@
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Edit2, Plus, Search, Trash2, CheckCircle, Sparkles } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import Modal from '@/components/Modal.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 interface Kesesuaian {
     id: number;
@@ -81,7 +81,13 @@ const openEdit = (item: Kesesuaian) => {
 };
 
 const submit = () => {
-    const opts = { preserveScroll: true, onSuccess: () => { showForm.value = false; } };
+    const opts = {
+        preserveScroll: true,
+        onSuccess: () => {
+            showForm.value = false;
+        },
+    };
+
     if (editTarget.value) {
         form.put(`/pengendalian/kesesuaian/${editTarget.value.id}`, opts);
     } else {
@@ -91,12 +97,22 @@ const submit = () => {
 
 const showDelete = ref(false);
 const deleteTarget = ref<Kesesuaian | null>(null);
-const openDelete = (item: Kesesuaian) => { deleteTarget.value = item; showDelete.value = true; };
+
+const openDelete = (item: Kesesuaian) => {
+    deleteTarget.value = item;
+    showDelete.value = true;
+};
+
 const confirmDelete = () => {
-    if (!deleteTarget.value) return;
+    if (!deleteTarget.value) {
+        return;
+    }
+
     router.delete(`/pengendalian/kesesuaian/${deleteTarget.value.id}`, {
         preserveScroll: true,
-        onSuccess: () => { showDelete.value = false; }
+        onSuccess: () => {
+            showDelete.value = false;
+        },
     });
 };
 </script>
@@ -145,11 +161,11 @@ const confirmDelete = () => {
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="p-3 rounded-xl bg-gray-50 /50 border dark:border-gray-700">
-                                <span class="text-[10px] text-gray-400 block uppercase font-bold flex items-center gap-1 mb-1"><CheckCircle class="size-3 text-green-500" /> Temuan Positif</span>
+                                <span class="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1 mb-1"><CheckCircle class="size-3 text-green-500" /> Temuan Positif</span>
                                 <p class="text-xs text-gray-700 dark:text-gray-300">{{ item.temuan_positif || '-' }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-blue-50/30 dark:bg-blue-900/10 border border-blue-50 dark:border-blue-900/30">
-                                <span class="text-[10px] text-blue-400 block uppercase font-bold flex items-center gap-1 mb-1"><Sparkles class="size-3" /> Rencana Peningkatan</span>
+                                <span class="text-[10px] text-blue-400 uppercase font-bold flex items-center gap-1 mb-1"><Sparkles class="size-3" /> Rencana Peningkatan</span>
                                 <p class="text-xs text-gray-700 dark:text-gray-300">{{ item.peningkatan || '-' }}</p>
                             </div>
                         </div>
