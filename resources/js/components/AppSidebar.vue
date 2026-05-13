@@ -8,6 +8,7 @@ import {
     ChevronDown,
     ClipboardCheck,
     ClipboardList,
+    Download,
     FileSearch,
     FileText,
     FolderOpen,
@@ -15,9 +16,10 @@ import {
     Settings,
     Shield,
     Target,
+    Upload,
     Users,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import NavUser from '@/components/NavUser.vue';
 import {
     Sidebar,
@@ -36,16 +38,30 @@ import {
 interface NavChild {
     title: string;
     href: string;
+    icon?: unknown;
 }
 
 interface NavGroup {
     title: string;
     icon: unknown;
     children: NavChild[];
+    roles?: string[]; // roles that can see this group. Empty = all roles.
 }
 
 const openGroups = ref<Record<string, boolean>>({});
 const page = usePage();
+
+const userRoles = computed<string[]>(() => {
+    const roles = (page.props.auth as any)?.roles ?? [];
+    return Array.isArray(roles) ? roles : [roles];
+});
+
+const hasRole = (...roles: string[]) => roles.some(r => userRoles.value.includes(r));
+const isAdmin = computed(() => hasRole('Admin'));
+const isAuditor = computed(() => hasRole('Auditor'));
+const isFakultas = computed(() => hasRole('Fakultas'));
+const isAuditee = computed(() => hasRole('Auditee'));
+
 const isActive = (href: string) => {
     if (page.url === href || page.url.startsWith(href + '?')) return true;
     return page.url.startsWith(href + '/');
@@ -83,7 +99,12 @@ const toggleGroup = (title: string) => {
     openGroups.value[title] = !openGroups.value[title];
 };
 
-const navGroups: NavGroup[] = [
+// ───────────────────────────────────────────────────────────
+// Navigation definitions per role
+// ───────────────────────────────────────────────────────────
+
+// ADMIN nav groups
+const adminNavGroups: NavGroup[] = [
     {
         title: 'Manajemen Referensi',
         icon: BookOpen,
@@ -147,11 +168,107 @@ const navGroups: NavGroup[] = [
         title: 'Pengaturan Sistem',
         icon: Settings,
         children: [
-            { title: 'Pengguna Portal', href: '/pengaturan/pengguna-portal' },
-            { title: 'Pengguna Backoffice', href: '/pengaturan/pengguna-backoffice' },
+            { title: 'Manajemen Pengguna', href: '/pengaturan/pengguna-backoffice' },
         ],
     },
 ];
+
+// AUDITOR nav groups
+const auditorNavGroups: NavGroup[] = [
+    {
+        title: 'Audit',
+        icon: FileSearch,
+        children: [
+            { title: 'Desk Evaluation', href: '/auditor/desk-evaluation' },
+            { title: 'Visitasi', href: '/auditor/visitasi' },
+            { title: 'Download Laporan AMI', href: '/auditor/download-laporan-ami' },
+            { title: 'Upload Laporan AMI', href: '/auditor/upload-laporan-ami' },
+        ],
+    },
+    {
+        title: 'Laporan',
+        icon: BarChart3,
+        children: [
+            { title: 'Rekap Daftar Temuan', href: '/auditor/rekap-temuan' },
+            { title: 'Rekap Daftar Kesesuaian', href: '/auditor/rekap-kesesuaian' },
+        ],
+    },
+];
+
+// AUDITEE nav groups
+const auditeeNavGroups: NavGroup[] = [
+    {
+        title: 'Evaluasi Diri',
+        icon: ClipboardList,
+        children: [
+            { title: 'Evaluasi Diri', href: '/pelaksanaan/evaluasi-diri' },
+        ],
+    },
+    {
+        title: 'Daftar Kesesuaian',
+        icon: ClipboardCheck,
+        children: [
+            { title: 'Daftar Kesesuaian', href: '/pengendalian/kesesuaian' },
+        ],
+    },
+    {
+        title: 'Daftar Temuan',
+        icon: FileText,
+        children: [
+            { title: 'Daftar Temuan', href: '/pengendalian/daftar-temuan' },
+        ],
+    },
+    {
+        title: 'Manajemen Dokumen',
+        icon: FolderOpen,
+        children: [
+            { title: 'Manajemen Dokumen', href: '/dokumen/manajemen' },
+        ],
+    },
+    {
+        title: 'Laporan AMI',
+        icon: FileSearch,
+        children: [
+            { title: 'Laporan AMI', href: '/ami/laporan-ami' },
+        ],
+    },
+];
+
+// FAKULTAS nav groups (same as admin minus pengaturan sistem)
+const fakultasNavGroups: NavGroup[] = [
+    {
+        title: 'Evaluasi AMI',
+        icon: FileSearch,
+        children: [
+            { title: 'Rekap Desk Evaluation', href: '/ami/rekap-desk-eval' },
+            { title: 'Laporan AMI', href: '/ami/laporan-ami' },
+        ],
+    },
+    {
+        title: 'Pengendalian & Peningkatan',
+        icon: ClipboardCheck,
+        children: [
+            { title: 'Daftar Temuan', href: '/pengendalian/daftar-temuan' },
+            { title: 'Daftar Kesesuaian', href: '/pengendalian/kesesuaian' },
+        ],
+    },
+    {
+        title: 'Manajemen Dokumen',
+        icon: FolderOpen,
+        children: [
+            { title: 'Manajemen Dokumen', href: '/dokumen/manajemen' },
+        ],
+    },
+];
+
+// Pick nav groups based on role
+const navGroups = computed<NavGroup[]>(() => {
+    if (isAdmin.value) return adminNavGroups;
+    if (isAuditor.value) return auditorNavGroups;
+    if (isAuditee.value) return auditeeNavGroups;
+    if (isFakultas.value) return fakultasNavGroups;
+    return adminNavGroups; // fallback
+});
 </script>
 
 <template>
@@ -160,8 +277,8 @@ const navGroups: NavGroup[] = [
             <SidebarMenu>
                 <!-- Beranda -->
                 <SidebarMenuItem>
-                    <SidebarMenuButton 
-                        as-child 
+                    <SidebarMenuButton
+                        as-child
                         :tooltip="'Beranda'"
                         :isActive="isActive('/dashboard')"
                     >
@@ -203,7 +320,7 @@ const navGroups: NavGroup[] = [
             <!-- User is now in the top header -->
         </SidebarFooter>
     </Sidebar>
-    
+
     <!-- Flyout Menu (Teleport) -->
     <Teleport to="body">
         <Transition
@@ -214,11 +331,11 @@ const navGroups: NavGroup[] = [
             leave-from-class="opacity-100 translate-y-0 scale-100"
             leave-to-class="opacity-0 translate-y-1 scale-95"
         >
-            <div 
-                v-if="hoveredGroup && state === 'collapsed'" 
+            <div
+                v-if="hoveredGroup && state === 'collapsed'"
                 class="fixed z-[100] w-56 flex-col rounded-lg bg-[#2d2d2d] p-2 text-sm shadow-xl border border-[#3d3d3d] pointer-events-auto origin-left"
                 :style="flyoutStyle"
-                @mouseenter="keepFlyout" 
+                @mouseenter="keepFlyout"
                 @mouseleave="hideFlyout"
             >
                 <template v-for="group in navGroups" :key="group.title">

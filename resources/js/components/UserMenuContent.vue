@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Link, router } from '@inertiajs/vue3';
-import { LogOut, Settings } from 'lucide-vue-next';
+import { Link, router, usePage } from '@inertiajs/vue3';
+import { LogOut, User, Download } from 'lucide-vue-next';
+import { computed } from 'vue';
 import {
     DropdownMenuGroup,
     DropdownMenuItem,
@@ -9,18 +10,28 @@ import {
 } from '@/components/ui/dropdown-menu';
 import UserInfo from '@/components/UserInfo.vue';
 import { logout } from '@/routes';
-import { edit } from '@/routes/profile';
-import type { User } from '@/types';
+import type { User as UserType } from '@/types';
 
 type Props = {
-    user: User;
+    user: UserType;
 };
+
+defineProps<Props>();
+
+const page = usePage();
+const userRole = computed(() => (page.props.auth as any)?.role ?? '');
 
 const handleLogout = () => {
     router.flushAll();
 };
 
-defineProps<Props>();
+// Download user manual links per role
+const userManuals: { label: string; href: string }[] = [
+    { label: 'User Manual Admin', href: '/storage/manuals/admin.pdf' },
+    { label: 'User Manual Auditor', href: '/storage/manuals/auditor.pdf' },
+    { label: 'User Manual Fakultas', href: '/storage/manuals/fakultas.pdf' },
+    { label: 'User Manual Prodi', href: '/storage/manuals/prodi.pdf' },
+];
 </script>
 
 <template>
@@ -32,10 +43,19 @@ defineProps<Props>();
     <DropdownMenuSeparator />
     <DropdownMenuGroup>
         <DropdownMenuItem :as-child="true">
-            <Link class="block w-full cursor-pointer" :href="edit()" prefetch>
-                <Settings class="mr-2 h-4 w-4" />
-                Settings
+            <Link class="block w-full cursor-pointer" href="/settings/profile" prefetch>
+                <User class="mr-2 h-4 w-4" />
+                Profil
             </Link>
+        </DropdownMenuItem>
+    </DropdownMenuGroup>
+    <DropdownMenuSeparator />
+    <DropdownMenuGroup>
+        <DropdownMenuItem v-for="manual in userManuals" :key="manual.label" :as-child="true">
+            <a :href="manual.href" target="_blank" rel="noopener" class="flex w-full items-center cursor-pointer">
+                <Download class="mr-2 h-4 w-4" />
+                {{ manual.label }}
+            </a>
         </DropdownMenuItem>
     </DropdownMenuGroup>
     <DropdownMenuSeparator />
@@ -48,7 +68,7 @@ defineProps<Props>();
             data-test="logout-button"
         >
             <LogOut class="mr-2 h-4 w-4" />
-            Log out
+            Keluar
         </Link>
     </DropdownMenuItem>
 </template>
