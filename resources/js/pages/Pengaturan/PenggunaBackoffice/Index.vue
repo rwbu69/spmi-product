@@ -2,9 +2,9 @@
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Edit2, Plus, Search, Trash2, UserCog, Mail, Key } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import Modal from '@/components/Modal.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 interface User {
     id: number;
@@ -57,7 +57,13 @@ const openEdit = (item: User) => {
 };
 
 const submit = () => {
-    const opts = { preserveScroll: true, onSuccess: () => { showForm.value = false; } };
+    const opts = {
+        preserveScroll: true,
+        onSuccess: () => {
+            showForm.value = false;
+        },
+    };
+
     if (editTarget.value) {
         form.put(`/pengaturan/pengguna-backoffice/${editTarget.value.id}`, opts);
     } else {
@@ -67,12 +73,22 @@ const submit = () => {
 
 const showDelete = ref(false);
 const deleteTarget = ref<User | null>(null);
-const openDelete = (item: User) => { deleteTarget.value = item; showDelete.value = true; };
+
+const openDelete = (item: User) => {
+    deleteTarget.value = item;
+    showDelete.value = true;
+};
+
 const confirmDelete = () => {
-    if (!deleteTarget.value) return;
+    if (!deleteTarget.value) {
+        return;
+    }
+
     router.delete(`/pengaturan/pengguna-backoffice/${deleteTarget.value.id}`, {
         preserveScroll: true,
-        onSuccess: () => { showDelete.value = false; }
+        onSuccess: () => {
+            showDelete.value = false;
+        },
     });
 };
 </script>

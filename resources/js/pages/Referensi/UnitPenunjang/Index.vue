@@ -2,9 +2,9 @@
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Edit2, Plus, Search, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import AppLayout from '@/layouts/AppLayout.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import Modal from '@/components/Modal.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 
 interface UnitPenunjang {
     id: number;
@@ -52,7 +52,13 @@ const form = useForm({
     keterangan: '',
 });
 
-const openCreate = () => { editTarget.value = null; form.reset(); form.clearErrors(); showForm.value = true; };
+const openCreate = () => {
+    editTarget.value = null;
+    form.reset();
+    form.clearErrors();
+    showForm.value = true;
+};
+
 const openEdit = (item: UnitPenunjang) => {
     editTarget.value = item;
     form.kode = item.kode;
@@ -64,25 +70,55 @@ const openEdit = (item: UnitPenunjang) => {
     form.clearErrors();
     showForm.value = true;
 };
-const closeForm = () => { showForm.value = false; editTarget.value = null; form.reset(); form.clearErrors(); };
+
+const closeForm = () => {
+    showForm.value = false;
+    editTarget.value = null;
+    form.reset();
+    form.clearErrors();
+};
+
 const submit = () => {
-    const opts = { preserveScroll: true, onSuccess: () => closeForm() };
-    editTarget.value
-        ? form.put(`/referensi/unit-penunjang/${editTarget.value.id}`, opts)
-        : form.post('/referensi/unit-penunjang', opts);
+    const opts = {
+        preserveScroll: true,
+        onSuccess: () => {
+            closeForm();
+        },
+    };
+
+    if (editTarget.value) {
+        form.put(`/referensi/unit-penunjang/${editTarget.value.id}`, opts);
+    } else {
+        form.post('/referensi/unit-penunjang', opts);
+    }
 };
 
 const showDelete = ref(false);
 const deleteTarget = ref<UnitPenunjang | null>(null);
 const deleting = ref(false);
-const openDelete = (item: UnitPenunjang) => { deleteTarget.value = item; showDelete.value = true; };
-const closeDelete = () => { showDelete.value = false; deleteTarget.value = null; };
+
+const openDelete = (item: UnitPenunjang) => {
+    deleteTarget.value = item;
+    showDelete.value = true;
+};
+
+const closeDelete = () => {
+    showDelete.value = false;
+    deleteTarget.value = null;
+};
+
 const confirmDelete = () => {
-    if (!deleteTarget.value) return;
+    if (!deleteTarget.value) {
+        return;
+    }
+
     deleting.value = true;
     router.delete(`/referensi/unit-penunjang/${deleteTarget.value.id}`, {
         preserveScroll: true,
-        onFinish: () => { deleting.value = false; closeDelete(); },
+        onFinish: () => {
+            deleting.value = false;
+            closeDelete();
+        },
     });
 };
 </script>
@@ -133,7 +169,7 @@ const confirmDelete = () => {
                         <td class="px-4 py-3 text-gray-500">{{ item.jenjang ?? '-' }}</td>
                         <td class="px-4 py-3 text-gray-500">{{ item.auditee_pusat?.nama ?? '-' }}</td>
                         <td class="px-4 py-3 text-gray-500">
-                            <div class="max-w-[300px] whitespace-normal break-words text-xs">
+                            <div class="max-w-75 whitespace-normal wrap-break-word text-xs">
                                 {{ item.keterangan || '-' }}
                             </div>
                         </td>
