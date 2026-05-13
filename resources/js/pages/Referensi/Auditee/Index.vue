@@ -1,8 +1,9 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Edit2, FileText, Plus, Search, Trash2 } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
+import Pagination from '@/components/Pagination.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import Modal from '@/components/Modal.vue';
 
@@ -207,17 +208,7 @@ const akreditasiBadge = (ak: string | null) => {
             </table>
         </div>
 
-        <div class="flex items-center justify-between text-sm text-gray-500">
-            <span>Total: {{ data.total }} data</span>
-            <div class="flex gap-1">
-                <template v-for="link in data.links" :key="link.label">
-                    <button v-if="link.url" type="button" class="rounded px-3 py-1 transition"
-                        :class="link.active ? 'bg-blue-600 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
-                        @click="router.get(link.url, {}, { preserveState: true })" v-html="link.label" />
-                    <span v-else class="cursor-default rounded px-3 py-1 text-gray-300" v-html="link.label" />
-                </template>
-            </div>
-        </div>
+        <Pagination :links="data.links" :total="data.total" />
     </div>
 
     <!-- Form Modal -->
@@ -319,3 +310,4 @@ const akreditasiBadge = (ak: string | null) => {
     <ConfirmDeleteModal :show="showDelete" :message="`Hapus auditee '${deleteTarget?.nama_auditee}'?`"
         :processing="deleting" @close="closeDelete" @confirm="confirmDelete" />
 </template>
+
