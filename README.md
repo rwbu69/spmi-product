@@ -24,7 +24,7 @@ choco install php composer nodejs mariadb -y
 1. **Kloning Repositori**
 Kloning repositori ini ke dalam direktori lokal Anda dan masuk ke dalam folder proyek.
 ```bash
-git clone <url-repositori-anda>
+git clone https://github.com/rwbu69/spmi-product.git
 cd spmi-product
 ```
 
