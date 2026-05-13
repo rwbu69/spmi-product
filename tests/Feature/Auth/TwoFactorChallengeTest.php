@@ -16,20 +16,23 @@ test('two factor challenge redirects to login when not authenticated', function 
 
 test('two factor challenge can be rendered', function () {
     Features::twoFactorAuthentication([
-        'confirm' => true,
+        'confirm'         => true,
         'confirmPassword' => true,
     ]);
 
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'username' => 'two_factor_test_user',
+    ]);
 
     $user->forceFill([
-        'two_factor_secret' => encrypt('test-secret'),
+        'two_factor_secret'         => encrypt('test-secret'),
         'two_factor_recovery_codes' => encrypt(json_encode(['code1', 'code2'])),
-        'two_factor_confirmed_at' => now(),
+        'two_factor_confirmed_at'   => now(),
     ])->save();
 
+    // Login menggunakan 'username' sesuai config/fortify.php
     $this->post(route('login'), [
-        'email' => $user->email,
+        'username' => 'two_factor_test_user',
         'password' => 'password',
     ]);
 
