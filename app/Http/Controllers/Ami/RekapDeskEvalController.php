@@ -45,4 +45,19 @@ class RekapDeskEvalController extends Controller
             }),
         ]);
     }
+
+    public function show(Request $request, $id): Response
+    {
+        $evaluasiDiri = EvaluasiDiri::with(['auditee', 'pengaturanPeriode.tahunPeriode', 'pengaturanPeriode.lembagaAkreditasi'])
+            ->findOrFail($id);
+
+        $deskEvaluations = DeskEvaluation::with(['auditor', 'indikator.standarMutu'])
+            ->where('evaluasi_diri_id', $id)
+            ->get();
+
+        return Inertia::render('Ami/RekapDeskEval/Show', [
+            'evaluasiDiri' => $evaluasiDiri,
+            'deskEvaluations' => $deskEvaluations,
+        ]);
+    }
 }

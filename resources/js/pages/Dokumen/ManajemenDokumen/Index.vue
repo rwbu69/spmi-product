@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Edit2, Plus, Search, Trash2, FileText, Download, Filter } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -100,7 +100,7 @@ const confirmDelete = () => {
     });
 };
 
-const getDownloadUrl = (path: string) => `/storage/${path}`;
+const getDownloadUrl = (item: ManajemenDokumen) => `/dokumen/manajemen/${item.id}/download`;
 </script>
 
 <template>
@@ -154,7 +154,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a :href="getDownloadUrl(item.file_path)" target="_blank" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" title="Unduh">
+                    <a :href="getDownloadUrl(item)" target="_blank" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800" title="Unduh">
                         <Download class="size-4" />
                     </a>
                     <button type="button" class="p-2 rounded-lg text-gray-400 hover:bg-blue-50 hover:text-blue-600" @click="openEdit(item)">
