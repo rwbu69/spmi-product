@@ -29,6 +29,13 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        $this->call([
+            RoleSeeder::class,
+            UserSeeder::class,
+        ]);
+
+        $user->assignRole('Administrator');
+
         // Tahun Periode
         $tahunId = DB::table('tahun_periode')->insertGetId([
             'tahun' => 2025,

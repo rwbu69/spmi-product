@@ -40,6 +40,7 @@ class PenggunaBackofficeController extends Controller
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
+            'username' => explode('@', $validated['email'])[0] . '_' . rand(100, 999),
             'password' => Hash::make($validated['password']),
         ]);
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head, router, Link } from '@inertiajs/vue3';
 import { Search, BarChart3, ChevronRight, LayoutDashboard } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
@@ -113,9 +113,9 @@ const getScoreColor = (score: number) => {
                 </div>
 
                 <div class="mt-4 pt-4 border-t dark:border-gray-800 flex justify-end">
-                    <button type="button" class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline">
+                    <Link :href="`/ami/rekap-desk-eval/${item.id}`" class="inline-flex items-center gap-2 text-xs font-bold text-blue-600 hover:underline">
                         Lihat Detail <ChevronRight class="size-3" />
-                    </button>
+                    </Link>
                 </div>
             </div>
         </div>

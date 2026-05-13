@@ -49,6 +49,7 @@ class HandleInertiaRequests extends Middleware
                         'updated_at' => $auditee->updated_at,
                         'time' => $auditee->updated_at->diffForHumans(),
                         'type' => 'blue',
+                        'link' => route('referensi.auditee.index'),
                     ];
                 }
 
@@ -61,6 +62,7 @@ class HandleInertiaRequests extends Middleware
                         'updated_at' => $standar->updated_at,
                         'time' => $standar->updated_at->diffForHumans(),
                         'type' => 'amber',
+                        'link' => route('penetapan.standar-mutu.index'),
                     ];
                 }
 
@@ -73,6 +75,7 @@ class HandleInertiaRequests extends Middleware
                         'updated_at' => $evaluasi->updated_at,
                         'time' => $evaluasi->updated_at->diffForHumans(),
                         'type' => 'green',
+                        'link' => route('pelaksanaan.evaluasi-diri.index'),
                     ];
                 }
 
@@ -85,6 +88,7 @@ class HandleInertiaRequests extends Middleware
                         'updated_at' => $nilai->updated_at,
                         'time' => $nilai->updated_at->diffForHumans(),
                         'type' => 'green',
+                        'link' => route('penetapan.nilai-mutu.index'),
                     ];
                 }
 
@@ -97,6 +101,7 @@ class HandleInertiaRequests extends Middleware
                         'updated_at' => $auditor->updated_at,
                         'time' => $auditor->updated_at->diffForHumans(),
                         'type' => 'blue',
+                        'link' => route('ami.auditor.index'),
                     ];
                 }
 
@@ -109,6 +114,24 @@ class HandleInertiaRequests extends Middleware
                         'updated_at' => $unit->updated_at,
                         'time' => $unit->updated_at->diffForHumans(),
                         'type' => 'amber',
+                        'link' => route('referensi.unit-penunjang.index'),
+                    ];
+                }
+
+                // Track Expiring Auditees (Assuming 5 year validity, notify 1 year before)
+                $expiringAuditees = \App\Models\Auditee::whereNotNull('sk_tanggal')
+                    ->whereRaw('DATE_ADD(sk_tanggal, INTERVAL 4 YEAR) <= ?', [now()])
+                    ->whereRaw('DATE_ADD(sk_tanggal, INTERVAL 5 YEAR) >= ?', [now()])
+                    ->count();
+
+                if ($expiringAuditees > 0) {
+                    $activities[] = [
+                        'title' => 'Pemberitahuan Auditee Expired',
+                        'message' => "Ada Sebanyak {$expiringAuditees} Auditee yang akan Expired Tahun Depan",
+                        'updated_at' => now(),
+                        'time' => now()->diffForHumans(),
+                        'type' => 'red',
+                        'link' => route('referensi.auditee.index'),
                     ];
                 }
 

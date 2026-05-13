@@ -2,7 +2,7 @@
 import AppLogo from '@/components/AppLogo.vue';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import { Bell, ChevronDown } from 'lucide-vue-next';
-import { usePage } from '@inertiajs/vue3';
+import { usePage, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import UserInfo from '@/components/UserInfo.vue';
 import UserMenuContent from '@/components/UserMenuContent.vue';
@@ -49,17 +49,17 @@ const notifications = computed(() => page.props.notifications || []);
                         <div v-if="notifications.length === 0" class="p-6 text-center text-gray-500 text-sm">
                             Tidak ada notifikasi baru
                         </div>
-                        <div v-else v-for="(notif, idx) in notifications" :key="idx" class="p-4 border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer flex gap-3 relative">
-                            <span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full" :class="notif.type === 'blue' ? 'bg-blue-600' : (notif.type === 'amber' ? 'bg-amber-500' : 'bg-green-500')"></span>
-                            <div class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full" :class="notif.type === 'blue' ? 'bg-blue-100 text-blue-600' : (notif.type === 'amber' ? 'bg-amber-100 text-amber-600' : 'bg-green-100 text-green-600')">
+                        <Link v-else v-for="(notif, idx) in notifications" :key="idx" :href="notif.link || '#'" class="p-4 border-b border-gray-50 hover:bg-gray-50 transition cursor-pointer flex gap-3 relative w-full text-left">
+                            <span class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full" :class="notif.type === 'blue' ? 'bg-blue-600' : (notif.type === 'amber' ? 'bg-amber-500' : (notif.type === 'red' ? 'bg-red-500' : 'bg-green-500'))"></span>
+                            <div class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full" :class="notif.type === 'blue' ? 'bg-blue-100 text-blue-600' : (notif.type === 'amber' ? 'bg-amber-100 text-amber-600' : (notif.type === 'red' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'))">
                                 <Bell class="size-4" />
                             </div>
-                            <div>
+                            <div class="flex-1">
                                 <p class="text-sm font-medium text-gray-900">{{ notif.title }}</p>
                                 <p class="text-xs text-gray-500 mt-1">{{ notif.message }}</p>
                                 <p class="text-[10px] text-gray-400 mt-2 font-medium">{{ notif.time }}</p>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                     <div class="bg-gray-50 border-t border-gray-100 p-2 text-center" v-if="notifications.length">
                         <button class="text-xs font-medium text-blue-600 hover:text-blue-700 transition">Tandai semua dibaca</button>

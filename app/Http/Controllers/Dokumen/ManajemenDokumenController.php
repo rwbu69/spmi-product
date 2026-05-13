@@ -52,7 +52,7 @@ class ManajemenDokumenController extends Controller
             'file'             => ['required', 'file', 'mimes:pdf', 'max:7168'],
         ], [], ['jenis_dokumen_id' => 'Jenis Dokumen', 'auditee_id' => 'Auditee', 'nama_dokumen' => 'Nama Dokumen', 'file' => 'File (PDF)']);
 
-        $path = $request->file('file')->store('dokumen', 'public');
+        $path = $request->file('file')->store('dokumen');
 
         ManajemenDokumen::create([
             'jenis_dokumen_id' => $request->jenis_dokumen_id,
@@ -79,8 +79,8 @@ class ManajemenDokumenController extends Controller
         $data = $request->only('jenis_dokumen_id', 'auditee_id', 'nama_dokumen', 'tahun');
 
         if ($request->hasFile('file')) {
-            Storage::disk('public')->delete($manajemen->file_path);
-            $data['file_path'] = $request->file('file')->store('dokumen', 'public');
+            Storage::disk('local')->delete($manajemen->file_path);
+            $data['file_path'] = $request->file('file')->store('dokumen');
         }
 
         $manajemen->update($data);
@@ -90,9 +90,14 @@ class ManajemenDokumenController extends Controller
 
     public function destroy(ManajemenDokumen $manajemen): RedirectResponse
     {
-        Storage::disk('public')->delete($manajemen->file_path);
         $manajemen->delete();
 
         return back()->with('success', 'Dokumen berhasil dihapus.');
+    }
+
+    public function download(ManajemenDokumen $manajemen)
+    {
+        // Check authorization here if necessary
+        return Storage::disk('local')->download($manajemen->file_path, $manajemen->nama_dokumen . '.pdf');
     }
 }
