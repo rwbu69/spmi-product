@@ -14,12 +14,24 @@ class VisitasiAuditorController extends Controller
     public function index(Request $request): Response
     {
         $periodeList = PengaturanPeriode::with(['lembagaAkreditasi', 'tahunPeriode'])
+            ->withCount('evaluasiDiri as auditee_count')
             ->get();
 
+        // Sama seperti DeskEvaluation: gunakan evaluasi_diri sebagai jembatan
+        $auditeeByPeriode = \App\Models\EvaluasiDiri::with('auditee')
+            ->select('pengaturan_periode_id', 'auditee_id')
+            ->distinct()
+            ->get()
+            ->groupBy('pengaturan_periode_id')
+            ->map(fn ($group) => $group->map(fn ($e) => [
+                'id'           => $e->auditee->id,
+                'nama_auditee' => $e->auditee->nama_auditee,
+            ])->values());
+
         return Inertia::render('Auditor/Visitasi/Index', [
-            'periodeList' => $periodeList,
-            'filters'     => $request->only(['periode_id']),
-            'auditeeList' => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee', 'pengaturan_periode_id']),
+            'periodeList'     => $periodeList,
+            'auditeeByPeriode' => $auditeeByPeriode,
+            'filters'         => $request->only(['periode_id']),
         ]);
     }
 }

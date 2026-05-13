@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { Head, router } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { ClipboardList, ChevronDown, ChevronRight } from 'lucide-vue-next';
 import { ref } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 
-interface Auditee { id: number; nama_auditee: string; pengaturan_periode_id: number | null; }
+interface AuditeeItem { id: number; nama_auditee: string }
 interface PengaturanPeriode {
     id: number;
     lembaga_akreditasi: { id: number; nama_lembaga: string };
@@ -14,16 +14,17 @@ interface PengaturanPeriode {
 
 const props = defineProps<{
     periodeList: PengaturanPeriode[];
-    auditeeList: Auditee[];
+    // Map of periode_id -> auditee list
+    auditeeByPeriode: Record<string | number, AuditeeItem[]>;
     filters: { periode_id?: string };
 }>();
 
 defineOptions({ layout: AppLayout });
 
-const selectedPeriodeId = ref(props.filters.periode_id ?? '');
+const selectedPeriodeId = ref<string>(props.filters.periode_id ?? '');
 
-const getAuditeeByPeriode = (periodeId: number) =>
-    props.auditeeList.filter(a => a.pengaturan_periode_id === periodeId);
+const getAuditeeList = (periodeId: number): AuditeeItem[] =>
+    props.auditeeByPeriode[periodeId] ?? [];
 </script>
 
 <template>
@@ -39,7 +40,7 @@ const getAuditeeByPeriode = (periodeId: number) =>
         <!-- Info Banner -->
         <div class="flex items-center gap-3 rounded-xl bg-blue-50 border border-blue-100 px-4 py-3 text-sm text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-300">
             <ClipboardList class="size-4 shrink-0" />
-            <span>Silakan pilih lembaga akreditasi untuk menampilkan standar mutu</span>
+            <span>Silakan pilih lembaga akreditasi untuk menampilkan daftar auditee</span>
         </div>
 
         <!-- Periode Count -->
@@ -62,7 +63,9 @@ const getAuditeeByPeriode = (periodeId: number) =>
                 <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800">
                     <div class="flex-1">
                         <h2 class="font-bold text-gray-900 dark:text-white">{{ periode.lembaga_akreditasi.nama_lembaga }}</h2>
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Memiliki {{ periode.auditee_count }} Standar Mutu</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                            {{ periode.auditee_count }} Evaluasi Diri tersubmit
+                        </p>
                         <span class="inline-flex mt-2 items-center rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 px-2 py-0.5 text-[10px] font-bold uppercase">
                             Periode {{ periode.tahun_periode.tahun }}
                         </span>
@@ -73,26 +76,29 @@ const getAuditeeByPeriode = (periodeId: number) =>
                             class="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
                             @click="selectedPeriodeId = selectedPeriodeId === String(periode.id) ? '' : String(periode.id)"
                         >
-                            Pilih Auditee / Unit Penunjang
-                            <ChevronDown class="size-4" />
+                            Pilih Auditee
+                            <ChevronDown
+                                class="size-4 transition-transform duration-200"
+                                :class="{ 'rotate-180': selectedPeriodeId === String(periode.id) }"
+                            />
                         </button>
                     </div>
                 </div>
 
-                <!-- Dropdown auditee list -->
+                <!-- Auditee list dropdown -->
                 <div v-if="selectedPeriodeId === String(periode.id)" class="px-6 py-3 bg-gray-50 dark:bg-gray-800/50">
                     <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Daftar Auditee</p>
-                    <div v-if="getAuditeeByPeriode(periode.id).length === 0" class="text-sm text-gray-400 py-2">
-                        Belum ada auditee terdaftar.
+                    <div v-if="getAuditeeList(periode.id).length === 0" class="text-sm text-gray-400 py-2">
+                        Belum ada auditee yang mengisi evaluasi diri pada periode ini.
                     </div>
                     <div v-else class="space-y-1">
                         <a
-                            v-for="auditee in getAuditeeByPeriode(periode.id)"
+                            v-for="auditee in getAuditeeList(periode.id)"
                             :key="auditee.id"
                             :href="`/pengendalian/daftar-temuan?auditee_id=${auditee.id}&periode_id=${periode.id}`"
                             class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition dark:text-gray-300 dark:hover:bg-blue-900/20"
                         >
-                            <ChevronRight class="size-3.5 text-blue-400" />
+                            <ChevronRight class="size-3.5 text-blue-400 shrink-0" />
                             {{ auditee.nama_auditee }}
                         </a>
                     </div>
