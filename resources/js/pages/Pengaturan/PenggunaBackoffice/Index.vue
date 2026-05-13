@@ -142,6 +142,7 @@ const confirmDelete = () => {
                     <UserCog class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                     <input v-model="form.name" type="text" placeholder="Masukkan nama..." class="w-full rounded-lg border pl-10 pr-3 py-2 text-sm  " />
                 </div>
+                <p v-if="form.errors.name" class="text-[11px] text-red-500 mt-1">{{ form.errors.name }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Alamat Email <span class="text-red-500">*</span></label>
@@ -149,6 +150,7 @@ const confirmDelete = () => {
                     <Mail class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                     <input v-model="form.email" type="email" placeholder="email@contoh.com" class="w-full rounded-lg border pl-10 pr-3 py-2 text-sm  " />
                 </div>
+                <p v-if="form.errors.email" class="text-[11px] text-red-500 mt-1">{{ form.errors.email }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Kata Sandi <span v-if="!editTarget" class="text-red-500">*</span></label>
@@ -156,6 +158,7 @@ const confirmDelete = () => {
                     <Key class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                     <input v-model="form.password" type="password" placeholder="••••••••" class="w-full rounded-lg border pl-10 pr-3 py-2 text-sm  " />
                 </div>
+                <p v-if="form.errors.password" class="text-[11px] text-red-500 mt-1">{{ form.errors.password }}</p>
                 <p v-if="editTarget" class="text-[10px] text-gray-400 mt-1">Kosongkan jika tidak ingin mengubah kata sandi.</p>
             </div>
 

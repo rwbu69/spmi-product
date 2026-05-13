@@ -171,6 +171,7 @@ const confirmDelete = () => {
                     <option value="">Pilih Periode</option>
                     <option v-for="p in periodeList" :key="p.id" :value="p.id">{{ p.label }}</option>
                 </select>
+                <p v-if="form.errors.pengaturan_periode_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.pengaturan_periode_id }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Auditee <span class="text-red-500">*</span></label>
@@ -178,11 +179,13 @@ const confirmDelete = () => {
                     <option value="">Pilih Auditee</option>
                     <option v-for="a in auditeeList" :key="a.id" :value="a.id">{{ a.nama_auditee }}</option>
                 </select>
+                <p v-if="form.errors.auditee_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-sm font-medium mb-1">Jumlah Temuan <span class="text-red-500">*</span></label>
                     <input v-model="form.jumlah_temuan" type="number" min="0" class="w-full rounded-lg border px-3 py-2 text-sm  " />
+                <p v-if="form.errors.jumlah_temuan" class="text-[11px] text-red-500 mt-1">{{ form.errors.jumlah_temuan }}</p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Status Approval <span class="text-red-500">*</span></label>
@@ -190,6 +193,7 @@ const confirmDelete = () => {
                         <option value="Pending">Pending</option>
                         <option value="Approved">Approved</option>
                     </select>
+                <p v-if="form.errors.status_approval" class="text-[11px] text-red-500 mt-1">{{ form.errors.status_approval }}</p>
                 </div>
             </div>
 

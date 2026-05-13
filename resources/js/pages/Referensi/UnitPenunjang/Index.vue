@@ -172,7 +172,7 @@ const confirmDelete = () => {
                 <input v-model="form.kode" type="text" placeholder="Contoh: UPT-01"
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.kode ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.kode" class="mt-1 text-xs text-red-500">{{ form.errors.kode }}</p>
+                <p v-if="form.errors.kode" class="text-[11px] text-red-500 mt-1">{{ form.errors.kode }}</p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Jenjang</label>
@@ -181,13 +181,14 @@ const confirmDelete = () => {
                     <option value="">-- Pilih Jenjang --</option>
                     <option v-for="j in jenjangOptions" :key="j" :value="j">{{ j }}</option>
                 </select>
+                <p v-if="form.errors.jenjang" class="text-[11px] text-red-500 mt-1">{{ form.errors.jenjang }}</p>
             </div>
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Unit <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_unit" type="text" placeholder="Contoh: Perpustakaan Pusat"
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.nama_unit ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.nama_unit" class="mt-1 text-xs text-red-500">{{ form.errors.nama_unit }}</p>
+                <p v-if="form.errors.nama_unit" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_unit }}</p>
             </div>
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Auditee Pusat <span class="text-red-500">*</span></label>
@@ -197,7 +198,7 @@ const confirmDelete = () => {
                     <option value="">-- Pilih Auditee Pusat --</option>
                     <option v-for="ap in auditeePusat" :key="ap.id" :value="ap.id">{{ ap.nama }}</option>
                 </select>
-                <p v-if="form.errors.auditee_pusat_id" class="mt-1 text-xs text-red-500">{{ form.errors.auditee_pusat_id }}</p>
+                <p v-if="form.errors.auditee_pusat_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_pusat_id }}</p>
             </div>
             <div class="sm:col-span-2">
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Alamat</label>

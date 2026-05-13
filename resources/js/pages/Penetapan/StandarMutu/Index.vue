@@ -185,6 +185,7 @@ const confirmDelete = () => {
                         <option value="">Pilih Lembaga</option>
                         <option v-for="l in lembagaList" :key="l.id" :value="l.id">{{ l.nama_lembaga }}</option>
                     </select>
+                <p v-if="form.errors.lembaga_akreditasi_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.lembaga_akreditasi_id }}</p>
                 </div>
                 <div class="col-span-1">
                     <label class="block text-sm font-medium mb-1 dark:text-gray-300">Tahun Periode <span class="text-red-500">*</span></label>
@@ -192,19 +193,23 @@ const confirmDelete = () => {
                         <option value="">Pilih Tahun</option>
                         <option v-for="t in tahunList" :key="t.id" :value="t.id">{{ t.tahun }}</option>
                     </select>
+                <p v-if="form.errors.tahun_periode_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.tahun_periode_id }}</p>
                 </div>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1 dark:text-gray-300">Kode <span class="text-red-500">*</span></label>
                 <input v-model="form.kode" type="text" placeholder="Contoh: STD.01" class="w-full rounded-lg border px-3 py-2 text-sm   " />
+                <p v-if="form.errors.kode" class="text-[11px] text-red-500 mt-1">{{ form.errors.kode }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1 dark:text-gray-300">Nama Standar <span class="text-red-500">*</span></label>
                 <input v-model="form.nama_standar" type="text" placeholder="Masukkan nama standar..." class="w-full rounded-lg border px-3 py-2 text-sm   " />
+                <p v-if="form.errors.nama_standar" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_standar }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1 dark:text-gray-300">Deskripsi</label>
                 <textarea v-model="form.deskripsi" rows="3" class="w-full rounded-lg border px-3 py-2 text-sm   " placeholder="Keterangan opsional..."></textarea>
+                <p v-if="form.errors.deskripsi" class="text-[11px] text-red-500 mt-1">{{ form.errors.deskripsi }}</p>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border rounded-lg hover:bg-gray-50" @click="showForm = false">Batal</button>

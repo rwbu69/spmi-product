@@ -145,7 +145,7 @@ const confirmDelete = () => {
                 <input v-model="form.nama_kategori" type="text" placeholder="Contoh: KEBIJAKAN MUTU"
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.nama_kategori ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.nama_kategori" class="mt-1 text-xs text-red-500">{{ form.errors.nama_kategori }}</p>
+                <p v-if="form.errors.nama_kategori" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_kategori }}</p>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50  dark:text-gray-300 dark:hover:bg-gray-800" @click="closeForm">Batal</button>

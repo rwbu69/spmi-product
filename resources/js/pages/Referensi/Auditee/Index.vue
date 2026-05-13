@@ -229,7 +229,7 @@ const akreditasiBadge = (ak: string | null) => {
                 <input v-model="form.kode" type="text" placeholder="Contoh: S1-TEO"
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.kode ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.kode" class="mt-1 text-xs text-red-500">{{ form.errors.kode }}</p>
+                <p v-if="form.errors.kode" class="text-[11px] text-red-500 mt-1">{{ form.errors.kode }}</p>
             </div>
 
             <!-- Jenjang -->
@@ -241,7 +241,7 @@ const akreditasiBadge = (ak: string | null) => {
                     <option value="">-- Pilih Jenjang --</option>
                     <option v-for="j in jenjangOptions" :key="j" :value="j">{{ j }}</option>
                 </select>
-                <p v-if="form.errors.jenjang" class="mt-1 text-xs text-red-500">{{ form.errors.jenjang }}</p>
+                <p v-if="form.errors.jenjang" class="text-[11px] text-red-500 mt-1">{{ form.errors.jenjang }}</p>
             </div>
 
             <!-- Nama -->
@@ -250,7 +250,7 @@ const akreditasiBadge = (ak: string | null) => {
                 <input v-model="form.nama_auditee" type="text" placeholder="Contoh: Sarjana Teologi"
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.nama_auditee ? 'border-red-400' : 'border-gray-300'" />
-                <p v-if="form.errors.nama_auditee" class="mt-1 text-xs text-red-500">{{ form.errors.nama_auditee }}</p>
+                <p v-if="form.errors.nama_auditee" class="text-[11px] text-red-500 mt-1">{{ form.errors.nama_auditee }}</p>
             </div>
 
             <!-- Auditee Pusat -->
@@ -262,7 +262,7 @@ const akreditasiBadge = (ak: string | null) => {
                     <option value="">-- Pilih Auditee Pusat --</option>
                     <option v-for="ap in auditeePusat" :key="ap.id" :value="ap.id">{{ ap.nama }}</option>
                 </select>
-                <p v-if="form.errors.auditee_pusat_id" class="mt-1 text-xs text-red-500">{{ form.errors.auditee_pusat_id }}</p>
+                <p v-if="form.errors.auditee_pusat_id" class="text-[11px] text-red-500 mt-1">{{ form.errors.auditee_pusat_id }}</p>
             </div>
 
             <!-- Akreditasi -->
@@ -273,6 +273,7 @@ const akreditasiBadge = (ak: string | null) => {
                     <option value="">-- Pilih Akreditasi --</option>
                     <option v-for="ak in akreditasiOptions" :key="ak" :value="ak">{{ ak }}</option>
                 </select>
+                <p v-if="form.errors.akreditasi" class="text-[11px] text-red-500 mt-1">{{ form.errors.akreditasi }}</p>
             </div>
 
             <!-- Alamat -->
@@ -287,11 +288,13 @@ const akreditasiBadge = (ak: string | null) => {
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Nomor SK</label>
                 <input v-model="form.sk_no" type="text" placeholder="No. SK..."
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " />
+                <p v-if="form.errors.sk_no" class="text-[11px] text-red-500 mt-1">{{ form.errors.sk_no }}</p>
             </div>
             <div>
                 <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal SK</label>
                 <input v-model="form.sk_tanggal" type="date"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   " />
+                <p v-if="form.errors.sk_tanggal" class="text-[11px] text-red-500 mt-1">{{ form.errors.sk_tanggal }}</p>
             </div>
 
             <!-- File SK -->
@@ -302,7 +305,6 @@ const akreditasiBadge = (ak: string | null) => {
                 </label>
                 <input type="file" accept="application/pdf" @change="onFileChange"
                     class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-blue-700   " />
-                <p v-if="form.errors.sk_file" class="mt-1 text-xs text-red-500">{{ form.errors.sk_file }}</p>
             </div>
 
             <div class="sm:col-span-2 flex justify-end gap-3 pt-2">

@@ -270,7 +270,7 @@ const confirmDelete = () => {
                     class="w-full rounded-lg border px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200   "
                     :class="form.errors.tahun ? 'border-red-400' : 'border-gray-300'"
                 />
-                <p v-if="form.errors.tahun" class="mt-1 text-xs text-red-500">{{ form.errors.tahun }}</p>
+                <p v-if="form.errors.tahun" class="text-[11px] text-red-500 mt-1">{{ form.errors.tahun }}</p>
             </div>
 
             <div>
@@ -285,7 +285,7 @@ const confirmDelete = () => {
                     <option value="Aktif">Aktif</option>
                     <option value="Tidak Aktif">Tidak Aktif</option>
                 </select>
-                <p v-if="form.errors.status" class="mt-1 text-xs text-red-500">{{ form.errors.status }}</p>
+                <p v-if="form.errors.status" class="text-[11px] text-red-500 mt-1">{{ form.errors.status }}</p>
             </div>
 
             <div class="flex justify-end gap-3 pt-2">
