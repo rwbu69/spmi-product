@@ -30,7 +30,7 @@ defineOptions({
     layout: {
         breadcrumbs: [
             {
-                title: 'Security settings',
+                title: 'Pengaturan Keamanan',
                 href: edit(),
             },
         ],
@@ -44,15 +44,15 @@ onUnmounted(() => clearTwoFactorAuthData());
 </script>
 
 <template>
-    <Head title="Security settings" />
+    <Head title="Pengaturan Keamanan" />
 
-    <h1 class="sr-only">Security settings</h1>
+    <h1 class="sr-only">Pengaturan Keamanan</h1>
 
     <div class="space-y-6">
         <Heading
             variant="small"
-            title="Update password"
-            description="Ensure your account is using a long, random password to stay secure"
+            title="Ubah Kata Sandi"
+            description="Pastikan akun Anda menggunakan kata sandi yang panjang dan acak untuk keamanan"
         />
 
         <Form
@@ -70,37 +70,37 @@ onUnmounted(() => clearTwoFactorAuthData());
             v-slot="{ errors, processing }"
         >
             <div class="grid gap-2">
-                <Label for="current_password">Current password</Label>
+                <Label for="current_password">Kata Sandi Saat Ini</Label>
                 <PasswordInput
                     id="current_password"
                     name="current_password"
                     class="mt-1 block w-full"
                     autocomplete="current-password"
-                    placeholder="Current password"
+                    placeholder="Kata sandi saat ini"
                 />
                 <InputError :message="errors.current_password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password">New password</Label>
+                <Label for="password">Kata Sandi Baru</Label>
                 <PasswordInput
                     id="password"
                     name="password"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    placeholder="New password"
+                    placeholder="Kata sandi baru"
                 />
                 <InputError :message="errors.password" />
             </div>
 
             <div class="grid gap-2">
-                <Label for="password_confirmation">Confirm password</Label>
+                <Label for="password_confirmation">Konfirmasi Kata Sandi</Label>
                 <PasswordInput
                     id="password_confirmation"
                     name="password_confirmation"
                     class="mt-1 block w-full"
                     autocomplete="new-password"
-                    placeholder="Confirm password"
+                    placeholder="Konfirmasi kata sandi"
                 />
                 <InputError :message="errors.password_confirmation" />
             </div>
@@ -110,7 +110,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                     :disabled="processing"
                     data-test="update-password-button"
                 >
-                    Save password
+                    Simpan Kata Sandi
                 </Button>
             </div>
         </Form>
@@ -119,8 +119,8 @@ onUnmounted(() => clearTwoFactorAuthData());
     <div v-if="canManageTwoFactor" class="space-y-6">
         <Heading
             variant="small"
-            title="Two-factor authentication"
-            description="Manage your two-factor authentication settings"
+            title="Autentikasi Dua Faktor"
+            description="Kelola pengaturan autentikasi dua faktor Anda"
         />
 
         <div
@@ -128,14 +128,14 @@ onUnmounted(() => clearTwoFactorAuthData());
             class="flex flex-col items-start justify-start space-y-4"
         >
             <p class="text-sm text-muted-foreground">
-                When you enable two-factor authentication, you will be prompted
-                for a secure pin during login. This pin can be retrieved from a
-                TOTP-supported application on your phone.
+                Saat Anda mengaktifkan autentikasi dua faktor, Anda akan diminta
+                memasukkan PIN aman saat login. PIN ini dapat diambil dari
+                aplikasi TOTP di ponsel Anda.
             </p>
 
             <div>
                 <Button v-if="hasSetupData" @click="showSetupModal = true">
-                    <ShieldCheck />Continue setup
+                    <ShieldCheck />Lanjutkan Pengaturan
                 </Button>
                 <Form
                     v-else
@@ -144,7 +144,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                     #default="{ processing }"
                 >
                     <Button type="submit" :disabled="processing">
-                        Enable 2FA
+                        Aktifkan 2FA
                     </Button>
                 </Form>
             </div>
@@ -152,9 +152,8 @@ onUnmounted(() => clearTwoFactorAuthData());
 
         <div v-else class="flex flex-col items-start justify-start space-y-4">
             <p class="text-sm text-muted-foreground">
-                You will be prompted for a secure, random pin during login,
-                which you can retrieve from the TOTP-supported application on
-                your phone.
+                Anda akan diminta memasukkan PIN acak yang aman saat login,
+                yang dapat Anda ambil dari aplikasi TOTP di ponsel Anda.
             </p>
 
             <div class="relative inline">
@@ -164,7 +163,7 @@ onUnmounted(() => clearTwoFactorAuthData());
                         type="submit"
                         :disabled="processing"
                     >
-                        Disable 2FA
+                        Nonaktifkan 2FA
                     </Button>
                 </Form>
             </div>
