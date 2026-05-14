@@ -7,6 +7,7 @@ use App\Models\Auditee;
 use App\Models\JenisDokumen;
 use App\Models\KategoriDokumen;
 use App\Models\ManajemenDokumen;
+use App\Models\UnitPenunjang;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,6 +22,7 @@ class ManajemenDokumenController extends Controller
             'jenisDokumen.kategoriDokumen:id,nama_kategori',
             'jenisDokumen:id,nama_jenis,kategori_dokumen_id',
             'auditee:id,nama_auditee',
+            'unitPenunjang:id,nama_unit',
             'user:id,name',
         ])
             ->when($request->search, fn ($q) => $q->where('nama_dokumen', 'like', "%{$request->search}%"))
@@ -33,34 +35,71 @@ class ManajemenDokumenController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // Build auditee list for filter: regular auditees only
+        $auditeeList = Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']);
+
+        // Build combined list for the form dropdown
+        // Group 1: Auditee (regular programs)
+        $auditeeOptions = Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee'])
+            ->map(fn ($a) => [
+                'value'   => 'auditee_' . $a->id,
+                'label'   => $a->nama_auditee,
+                'type'    => 'auditee',
+                'id'      => $a->id,
+                'auditee_id' => $a->id,
+                'unit_penunjang_id' => null,
+            ]);
+
+        // Group 2: Unit Penunjang
+        $unitOptions = UnitPenunjang::orderBy('nama_unit')->get(['id', 'nama_unit'])
+            ->map(fn ($u) => [
+                'value'   => 'unit_' . $u->id,
+                'label'   => $u->nama_unit,
+                'type'    => 'unit_penunjang',
+                'id'      => $u->id,
+                'auditee_id' => null,
+                'unit_penunjang_id' => $u->id,
+            ]);
+
         return Inertia::render('Dokumen/ManajemenDokumen/Index', [
-            'data'         => $data,
-            'filters'      => $request->only('search', 'kategori_id', 'auditee_id'),
-            'kategoriList' => KategoriDokumen::orderBy('nama_kategori')->get(['id', 'nama_kategori']),
-            'jenisList'    => JenisDokumen::with('kategoriDokumen:id,nama_kategori')->orderBy('nama_jenis')->get(),
-            'auditeeList'  => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']),
+            'data'           => $data,
+            'filters'        => $request->only('search', 'kategori_id', 'auditee_id'),
+            'kategoriList'   => KategoriDokumen::orderBy('nama_kategori')->get(['id', 'nama_kategori']),
+            'jenisList'      => JenisDokumen::with('kategoriDokumen:id,nama_kategori')->orderBy('nama_jenis')->get(),
+            'auditeeList'    => $auditeeList,
+            'auditeeOptions' => $auditeeOptions,
+            'unitOptions'    => $unitOptions,
         ]);
     }
 
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'jenis_dokumen_id' => ['required', 'exists:jenis_dokumen,id'],
-            'auditee_id'       => ['required', 'exists:auditee,id'],
-            'nama_dokumen'     => ['required', 'string', 'max:255'],
-            'tahun'            => ['nullable', 'integer', 'min:2000', 'max:2100'],
-            'file'             => ['required', 'file', 'mimes:pdf', 'max:7168'],
-        ], [], ['jenis_dokumen_id' => 'Jenis Dokumen', 'auditee_id' => 'Auditee', 'nama_dokumen' => 'Nama Dokumen', 'file' => 'File (PDF)']);
+            'jenis_dokumen_id'   => ['required', 'exists:jenis_dokumen,id'],
+            'penerima_type'      => ['required', 'in:auditee,unit_penunjang'],
+            'auditee_id'         => ['nullable', 'required_if:penerima_type,auditee', 'exists:auditee,id'],
+            'unit_penunjang_id'  => ['nullable', 'required_if:penerima_type,unit_penunjang', 'exists:unit_penunjang,id'],
+            'nama_dokumen'       => ['required', 'string', 'max:255'],
+            'tahun'              => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'file'               => ['required', 'file', 'mimes:pdf', 'max:7168'],
+        ], [], [
+            'jenis_dokumen_id'  => 'Jenis Dokumen',
+            'auditee_id'        => 'Auditee',
+            'unit_penunjang_id' => 'Unit Penunjang',
+            'nama_dokumen'      => 'Nama Dokumen',
+            'file'              => 'File (PDF)',
+        ]);
 
         $path = $request->file('file')->store('dokumen');
 
         ManajemenDokumen::create([
-            'jenis_dokumen_id' => $request->jenis_dokumen_id,
-            'auditee_id'       => $request->auditee_id,
-            'user_id'          => auth()->id(),
-            'nama_dokumen'     => $request->nama_dokumen,
-            'tahun'            => $request->tahun,
-            'file_path'        => $path,
+            'jenis_dokumen_id'  => $request->jenis_dokumen_id,
+            'auditee_id'        => $request->penerima_type === 'auditee' ? $request->auditee_id : null,
+            'unit_penunjang_id' => $request->penerima_type === 'unit_penunjang' ? $request->unit_penunjang_id : null,
+            'user_id'           => auth()->id(),
+            'nama_dokumen'      => $request->nama_dokumen,
+            'tahun'             => $request->tahun,
+            'file_path'         => $path,
         ]);
 
         return back()->with('success', 'Dokumen berhasil diunggah.');
@@ -69,14 +108,22 @@ class ManajemenDokumenController extends Controller
     public function update(Request $request, ManajemenDokumen $manajemen): RedirectResponse
     {
         $request->validate([
-            'jenis_dokumen_id' => ['required', 'exists:jenis_dokumen,id'],
-            'auditee_id'       => ['required', 'exists:auditee,id'],
-            'nama_dokumen'     => ['required', 'string', 'max:255'],
-            'tahun'            => ['nullable', 'integer', 'min:2000', 'max:2100'],
-            'file'             => ['nullable', 'file', 'mimes:pdf', 'max:7168'],
+            'jenis_dokumen_id'  => ['required', 'exists:jenis_dokumen,id'],
+            'penerima_type'     => ['required', 'in:auditee,unit_penunjang'],
+            'auditee_id'        => ['nullable', 'required_if:penerima_type,auditee', 'exists:auditee,id'],
+            'unit_penunjang_id' => ['nullable', 'required_if:penerima_type,unit_penunjang', 'exists:unit_penunjang,id'],
+            'nama_dokumen'      => ['required', 'string', 'max:255'],
+            'tahun'             => ['nullable', 'integer', 'min:2000', 'max:2100'],
+            'file'              => ['nullable', 'file', 'mimes:pdf', 'max:7168'],
         ]);
 
-        $data = $request->only('jenis_dokumen_id', 'auditee_id', 'nama_dokumen', 'tahun');
+        $data = [
+            'jenis_dokumen_id'  => $request->jenis_dokumen_id,
+            'auditee_id'        => $request->penerima_type === 'auditee' ? $request->auditee_id : null,
+            'unit_penunjang_id' => $request->penerima_type === 'unit_penunjang' ? $request->unit_penunjang_id : null,
+            'nama_dokumen'      => $request->nama_dokumen,
+            'tahun'             => $request->tahun,
+        ];
 
         if ($request->hasFile('file')) {
             Storage::disk('local')->delete($manajemen->file_path);
@@ -97,7 +144,18 @@ class ManajemenDokumenController extends Controller
 
     public function download(ManajemenDokumen $manajemen)
     {
-        // Check authorization here if necessary
-        return Storage::disk('local')->download($manajemen->file_path, $manajemen->nama_dokumen . '.pdf');
+        $path = $manajemen->file_path;
+
+        if (! Storage::disk('local')->exists($path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        $filename = preg_replace('/[^\w\-.]/', '_', $manajemen->nama_dokumen) . '.pdf';
+        $fullPath = Storage::disk('local')->path($path);
+
+        return response()->file($fullPath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
     }
 }

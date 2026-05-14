@@ -15,6 +15,8 @@ class EvaluasiDiriController extends Controller
 {
     public function index(Request $request): Response
     {
+        $isAuditee = auth()->user()?->hasAnyRole(['Auditee', 'Unit Penunjang']);
+
         $query = EvaluasiDiri::with(['auditee', 'pengaturanPeriode.tahunPeriode', 'pengaturanPeriode.lembagaAkreditasi']);
 
         if ($request->search) {
@@ -29,16 +31,36 @@ class EvaluasiDiriController extends Controller
 
         $data = $query->latest()->paginate(10)->withQueryString();
 
+        $periodeList = PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get()->map(fn ($p) => [
+            'id'    => $p->id,
+            'label' => "{$p->lembagaAkreditasi->nama_lembaga} [{$p->tahunPeriode->tahun}]",
+        ]);
+
+        // Build period alert banners for Auditee (expired periods)
+        $periodeAlerts = [];
+        if ($isAuditee) {
+            $allPeriode = PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get();
+            foreach ($allPeriode as $p) {
+                // Assume tanggal_mulai / tanggal_selesai fields exist, fallback gracefully
+                $selesai = $p->tanggal_selesai ?? null;
+                if ($selesai && now()->isAfter($selesai)) {
+                    $hariLewat = now()->diffInDays($selesai);
+                    $periodeAlerts[] = [
+                        'label'      => "{$p->lembagaAkreditasi->nama_lembaga} [{$p->tahunPeriode->tahun}]",
+                        'mulai'      => optional($p->tanggal_mulai)->format('d-m-Y') ?? '-',
+                        'selesai'    => optional($selesai)->format('d-m-Y') ?? '-',
+                        'hari_lewat' => $hariLewat,
+                    ];
+                }
+            }
+        }
+
         return Inertia::render('Pelaksanaan/EvaluasiDiri/Index', [
-            'data' => $data,
-            'filters' => $request->only(['search', 'periode_id']),
-            'periodeList' => PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get()->map(function($p) {
-                return [
-                    'id' => $p->id,
-                    'label' => "Periode {$p->tahunPeriode->tahun} - {$p->lembagaAkreditasi->nama_lembaga}"
-                ];
-            }),
-            'auditeeList' => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']),
+            'data'          => $data,
+            'filters'       => $request->only(['search', 'periode_id']),
+            'periodeList'   => $periodeList,
+            'auditeeList'   => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']),
+            'periodeAlerts' => $periodeAlerts,
         ]);
     }
 

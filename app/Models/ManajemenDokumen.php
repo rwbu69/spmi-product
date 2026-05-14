@@ -25,6 +25,7 @@ class ManajemenDokumen extends Model
     protected $fillable = [
         'jenis_dokumen_id',
         'auditee_id',
+        'unit_penunjang_id',
         'user_id',
         'nama_dokumen',
         'tahun',
@@ -39,6 +40,11 @@ class ManajemenDokumen extends Model
     public function auditee(): BelongsTo
     {
         return $this->belongsTo(Auditee::class, 'auditee_id');
+    }
+
+    public function unitPenunjang(): BelongsTo
+    {
+        return $this->belongsTo(UnitPenunjang::class, 'unit_penunjang_id');
     }
 
     public function user(): BelongsTo

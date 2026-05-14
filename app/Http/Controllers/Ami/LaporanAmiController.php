@@ -30,16 +30,23 @@ class LaporanAmiController extends Controller
 
         $data = $query->latest()->paginate(10)->withQueryString();
 
+        // For Auditee role: pass the current auditee record for the header info
+        $currentAuditee = null;
+        if (auth()->user()?->hasAnyRole(['Auditee', 'Unit Penunjang'])) {
+            // Try to resolve auditee by user name match
+            $currentAuditee = Auditee::where('nama_auditee', auth()->user()->name)->first(['id', 'nama_auditee'])
+                ?? Auditee::first(['id', 'nama_auditee']);
+        }
+
         return Inertia::render('Ami/LaporanAmi/Index', [
-            'data' => $data,
-            'filters' => $request->only(['search', 'periode_id']),
-            'periodeList' => PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get()->map(function($p) {
-                return [
-                    'id' => $p->id,
-                    'label' => "Periode {$p->tahunPeriode->tahun} - {$p->lembagaAkreditasi->nama_lembaga}"
-                ];
-            }),
-            'auditeeList' => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']),
+            'data'           => $data,
+            'filters'        => $request->only(['search', 'periode_id']),
+            'periodeList'    => PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get()->map(fn ($p) => [
+                'id'    => $p->id,
+                'label' => "Periode {$p->tahunPeriode->tahun} - {$p->lembagaAkreditasi->nama_lembaga}",
+            ]),
+            'auditeeList'    => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']),
+            'currentAuditee' => $currentAuditee,
         ]);
     }
 
@@ -92,5 +99,16 @@ class LaporanAmiController extends Controller
         $laporanAmi->delete();
 
         return back()->with('success', 'Laporan AMI berhasil dihapus.');
+    }
+
+    public function download(LaporanAmi $laporanAmi)
+    {
+        $fullPath = Storage::disk('public')->path($laporanAmi->file_laporan);
+
+        if (! file_exists($fullPath)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        return response()->file($fullPath);
     }
 }

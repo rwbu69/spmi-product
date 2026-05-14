@@ -15,11 +15,11 @@ class StandarMutuController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = StandarMutu::with(['lembagaAkreditasi', 'tahunPeriode'])
-            ->whereNull('parent_id'); // Get top-level standards
+        $query = StandarMutu::with(['lembagaAkreditasi', 'tahunPeriode', 'childrenRecursive.indikator', 'indikator'])
+            ->whereNull('parent_id');
 
         if ($request->search) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('kode', 'like', "%{$request->search}%")
                   ->orWhere('nama_standar', 'like', "%{$request->search}%");
             });
@@ -33,22 +33,43 @@ class StandarMutuController extends Controller
             $query->where('tahun_periode_id', $request->tahun_id);
         }
 
-        $data = $query->orderBy('kode')->paginate(10)->withQueryString();
+        $standarList = $query->orderBy('kode')->get();
+
+        // Recursively count total (including nested)
+        $countAll = function ($items) use (&$countAll) {
+            $total = 0;
+            foreach ($items as $item) {
+                $total++;
+                $total += $countAll($item->childrenRecursive ?? collect());
+            }
+            return $total;
+        };
 
         return Inertia::render('Penetapan/StandarMutu/Index', [
-            'data' => $data,
-            'filters' => $request->only(['search', 'lembaga_id', 'tahun_id']),
-            'lembagaList' => LembagaAkreditasi::orderBy('nama_lembaga')->get(['id', 'nama_lembaga']),
-            'tahunList' => TahunPeriode::orderByDesc('tahun')->get(['id', 'tahun', 'status']),
+            'standarTree'  => $standarList,
+            'totalStandar' => $countAll($standarList),
+            'filters'      => $request->only(['search', 'lembaga_id', 'tahun_id']),
+            'lembagaList'  => LembagaAkreditasi::orderBy('nama_lembaga')->get(['id', 'nama_lembaga']),
+            'tahunList'    => TahunPeriode::orderByDesc('tahun')->get(['id', 'tahun', 'status']),
+            // Keep for Add form
+            'lembagaAll'   => LembagaAkreditasi::orderBy('nama_lembaga')->get(['id', 'nama_lembaga']),
+            'tahunAll'     => TahunPeriode::orderByDesc('tahun')->get(['id', 'tahun']),
         ]);
     }
 
     public function show(StandarMutu $standarMutu): Response
     {
-        $standarMutu->load(['childrenRecursive.indikator', 'indikator', 'lembagaAkreditasi', 'tahunPeriode']);
-        
+        $standarMutu->load([
+            'indikator',
+            'lembagaAkreditasi',
+            'tahunPeriode',
+            'childrenRecursive.indikator',
+            'childrenRecursive.childrenRecursive.indikator',
+            'childrenRecursive.childrenRecursive.childrenRecursive.indikator',
+        ]);
+
         return Inertia::render('Penetapan/StandarMutu/Show', [
-            'standar' => $standarMutu
+            'standar' => $standarMutu,
         ]);
     }
 

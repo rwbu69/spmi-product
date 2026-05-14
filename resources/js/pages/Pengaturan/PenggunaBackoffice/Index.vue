@@ -34,10 +34,11 @@ const search = ref(props.filters.search ?? '');
 const filterRole = ref(props.filters.role ?? '');
 
 const ROLE_COLORS: Record<string, string> = {
-    Admin:    'bg-purple-100 text-purple-700',
-    Auditor:  'bg-blue-100 text-blue-700',
-    Fakultas: 'bg-teal-100 text-teal-700',
-    Auditee:  'bg-orange-100 text-orange-700',
+    Admin:          'bg-purple-100 text-purple-700',
+    Auditor:        'bg-blue-100 text-blue-700',
+    Fakultas:       'bg-teal-100 text-teal-700',
+    Auditee:        'bg-orange-100 text-orange-700',
+    'Unit Penunjang': 'bg-green-100 text-green-700',
 };
 
 const roleColor = (name: string) => ROLE_COLORS[name] ?? 'bg-gray-100 text-gray-700';
