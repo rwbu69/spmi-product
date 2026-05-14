@@ -3,8 +3,10 @@ import { Head, router, useForm } from '@inertiajs/vue3';
 import { ChevronDown, ChevronRight, Plus, Trash2, Edit2, ChevronsDownUp, ChevronsUpDown } from 'lucide-vue-next';
 import { ref, defineComponent, h, type PropType } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
-import Modal from '@/components/Modal.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
+import { PageHeader, FormModal } from '@/components/index';
+import { BaseButton, BaseInput, BaseTextarea, BaseSelect } from '@/components/index';
+import { FormField, FormActions } from '@/components/index';
 
 interface Indikator { id: number; deskripsi: string; bobot: number; }
 interface StandarNode {
@@ -291,47 +293,35 @@ const TreeRow = defineComponent({
     <div class="space-y-5 p-6">
 
         <!-- Page Header -->
-        <div class="flex items-center justify-between flex-wrap gap-3">
-            <div>
-                <h1 class="text-xl font-semibold text-gray-900">Daftar Standar Mutu</h1>
-                <p class="text-xs text-gray-400 mt-0.5">Kelola pernyataan standar mutu internal</p>
-            </div>
-            <button
-                type="button"
-                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 transition"
-                @click="openCreate()"
-            >
-                <Plus class="size-4" /> Tambah Standar
-            </button>
-        </div>
+        <PageHeader title="Daftar Standar Mutu" subtitle="Kelola pernyataan standar mutu internal">
+            <template #actions>
+                <BaseButton variant="primary" @click="openCreate()">
+                    <Plus class="size-4" /> Tambah Standar
+                </BaseButton>
+            </template>
+        </PageHeader>
 
         <!-- Filters + controls row -->
         <div class="flex flex-wrap items-center gap-3">
             <!-- Expand / Collapse -->
-            <button type="button"
-                class="inline-flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition"
-                @click="expandAll"
-            >
+            <BaseButton variant="secondary" size="sm" @click="expandAll">
                 <ChevronsUpDown class="size-3.5" /> Expand all
-            </button>
-            <button type="button"
-                class="inline-flex items-center gap-1.5 rounded border border-gray-300 bg-white px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition"
-                @click="collapseAll"
-            >
+            </BaseButton>
+            <BaseButton variant="secondary" size="sm" @click="collapseAll">
                 <ChevronsDownUp class="size-3.5" /> Collapse all
-            </button>
+            </BaseButton>
 
             <!-- Tahun -->
-            <select v-model="tahun_id" @change="applyFilter" class="rounded border border-gray-300 px-3 py-1.5 text-sm bg-white">
+            <BaseSelect v-model="tahun_id" @change="applyFilter">
                 <option value="">Semua Tahun</option>
                 <option v-for="t in tahunList" :key="t.id" :value="t.id">{{ t.tahun }}</option>
-            </select>
+            </BaseSelect>
 
             <!-- Lembaga -->
-            <select v-model="lembaga_id" @change="applyFilter" class="rounded border border-gray-300 px-3 py-1.5 text-sm bg-white">
+            <BaseSelect v-model="lembaga_id" @change="applyFilter">
                 <option value="">Semua Lembaga</option>
                 <option v-for="l in lembagaList" :key="l.id" :value="l.id">{{ l.nama_lembaga }}</option>
-            </select>
+            </BaseSelect>
 
             <!-- Count badge -->
             <span class="ml-auto inline-flex items-center gap-1.5 rounded-full bg-blue-600 px-3 py-1 text-xs font-bold text-white">
@@ -377,64 +367,50 @@ const TreeRow = defineComponent({
     </div>
 
     <!-- Add / Edit Standar Modal -->
-    <Modal :show="showForm" :title="editTarget ? 'Edit Standar Mutu' : 'Tambah Standar Mutu'" max-width="md" @close="showForm = false">
+    <FormModal :show="showForm" :title="editTarget ? 'Edit Standar Mutu' : 'Tambah Standar Mutu'" max-width="md" @close="showForm = false">
         <form @submit.prevent="submitForm" class="space-y-4">
             <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Kode <span class="text-red-500">*</span></label>
-                    <input v-model="form.kode" type="text" placeholder="Contoh: A.1.1" class="w-full rounded-lg border px-3 py-2 text-sm" />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Level <span class="text-red-500">*</span></label>
-                    <input v-model="form.level" type="number" min="1" class="w-full rounded-lg border px-3 py-2 text-sm" />
-                </div>
+                <FormField label="Kode" :required="true">
+                    <BaseInput v-model="form.kode" type="text" placeholder="Contoh: A.1.1" />
+                </FormField>
+                <FormField label="Level" :required="true">
+                    <BaseInput v-model="form.level" type="number" :min="1" />
+                </FormField>
             </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Nama Standar <span class="text-red-500">*</span></label>
-                <input v-model="form.nama_standar" type="text" class="w-full rounded-lg border px-3 py-2 text-sm" />
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Lembaga Akreditasi <span class="text-red-500">*</span></label>
-                <select v-model="form.lembaga_akreditasi_id" class="w-full rounded-lg border px-3 py-2 text-sm">
+            <FormField label="Nama Standar" :required="true">
+                <BaseInput v-model="form.nama_standar" type="text" />
+            </FormField>
+            <FormField label="Lembaga Akreditasi" :required="true">
+                <BaseSelect v-model="form.lembaga_akreditasi_id">
                     <option value="">Pilih Lembaga</option>
                     <option v-for="l in lembagaAll" :key="l.id" :value="l.id">{{ l.nama_lembaga }}</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Tahun Periode <span class="text-red-500">*</span></label>
-                <select v-model="form.tahun_periode_id" class="w-full rounded-lg border px-3 py-2 text-sm">
+                </BaseSelect>
+            </FormField>
+            <FormField label="Tahun Periode" :required="true">
+                <BaseSelect v-model="form.tahun_periode_id">
                     <option value="">Pilih Tahun</option>
                     <option v-for="t in tahunAll" :key="t.id" :value="t.id">{{ t.tahun }}</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Deskripsi</label>
-                <textarea v-model="form.deskripsi" rows="3" class="w-full rounded-lg border px-3 py-2 text-sm"></textarea>
-            </div>
-            <div class="flex justify-end gap-3 pt-2">
-                <button type="button" class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50" @click="showForm = false">Batal</button>
-                <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700" :disabled="form.processing">Simpan</button>
-            </div>
+                </BaseSelect>
+            </FormField>
+            <FormField label="Deskripsi">
+                <BaseTextarea v-model="form.deskripsi" :rows="3" />
+            </FormField>
+            <FormActions :processing="form.processing" @cancel="showForm = false" />
         </form>
-    </Modal>
+    </FormModal>
 
     <!-- Add / Edit Indikator Modal -->
-    <Modal :show="showIndForm" :title="editIndTarget ? 'Edit Indikator' : 'Tambah Indikator'" max-width="md" @close="showIndForm = false">
+    <FormModal :show="showIndForm" :title="editIndTarget ? 'Edit Indikator' : 'Tambah Indikator'" max-width="md" @close="showIndForm = false">
         <form @submit.prevent="submitInd" class="space-y-4">
-            <div>
-                <label class="block text-sm font-medium mb-1">Deskripsi Indikator <span class="text-red-500">*</span></label>
-                <textarea v-model="indForm.deskripsi" rows="4" class="w-full rounded-lg border px-3 py-2 text-sm"></textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-medium mb-1">Bobot (%) <span class="text-red-500">*</span></label>
-                <input v-model="indForm.bobot" type="number" min="0" max="100" class="w-full rounded-lg border px-3 py-2 text-sm" />
-            </div>
-            <div class="flex justify-end gap-3 pt-2">
-                <button type="button" class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50" @click="showIndForm = false">Batal</button>
-                <button type="submit" class="px-4 py-2 text-sm text-white bg-blue-600 rounded-lg hover:bg-blue-700" :disabled="indForm.processing">Simpan</button>
-            </div>
+            <FormField label="Deskripsi Indikator" :required="true">
+                <BaseTextarea v-model="indForm.deskripsi" :rows="4" />
+            </FormField>
+            <FormField label="Bobot (%)" :required="true">
+                <BaseInput v-model="indForm.bobot" type="number" :min="0" :max="100" />
+            </FormField>
+            <FormActions :processing="indForm.processing" @cancel="showIndForm = false" />
         </form>
-    </Modal>
+    </FormModal>
 
     <ConfirmDeleteModal :show="showDelete" message="Hapus standar mutu ini?" @close="showDelete = false" @confirm="confirmDelete" />
     <ConfirmDeleteModal :show="showDeleteInd" message="Hapus indikator ini?" @close="showDeleteInd = false" @confirm="confirmDeleteInd" />
