@@ -50,7 +50,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ── Manajemen Dokumen ──────────────────────────────────
-    Route::prefix('dokumen')->name('dokumen.')->middleware(['role:Admin|Auditee|Fakultas'])->group(function () {
+    Route::prefix('dokumen')->name('dokumen.')->middleware(['role:Admin|Auditee|Fakultas|Unit Penunjang'])->group(function () {
         Route::resource('kategori', KategoriDokumenController::class)->except(['create', 'edit', 'show']);
         Route::resource('jenis', JenisDokumenController::class)->except(['create', 'edit', 'show']);
         Route::resource('manajemen', ManajemenDokumenController::class)->except(['create', 'edit', 'show']);
@@ -65,7 +65,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ── Pelaksanaan ────────────────────────────────────────
-    Route::prefix('pelaksanaan')->name('pelaksanaan.')->middleware(['role:Admin|Auditee'])->group(function () {
+    Route::prefix('pelaksanaan')->name('pelaksanaan.')->middleware(['role:Admin|Auditee|Unit Penunjang'])->group(function () {
         Route::resource('pengaturan-periode', PengaturanPeriodeController::class)->except(['create', 'edit', 'show']);
         Route::resource('target-nilai', TargetNilaiMutuController::class)->except(['create', 'edit', 'show']);
         Route::resource('evaluasi-diri', EvaluasiDiriController::class)->only(['index', 'store', 'destroy']);
@@ -80,11 +80,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('laporan-ami', LaporanAmiController::class)->except(['create', 'edit', 'show']);
     });
 
-    // ── Evaluasi AMI (Admin + Fakultas) ───────────────────────
-    Route::prefix('ami')->name('ami.view.')->middleware(['role:Admin|Fakultas'])->group(function () {
+    // ── Evaluasi AMI (Admin + Fakultas + Auditee + Unit Penunjang) ───────────────────────
+    Route::prefix('ami')->name('ami.view.')->middleware(['role:Admin|Fakultas|Auditee|Unit Penunjang'])->group(function () {
         Route::get('rekap-desk-eval', [RekapDeskEvalController::class, 'index'])->name('rekap-desk-eval.index');
+        Route::get('rekap-desk-eval/standar/{lembagaId}', [RekapDeskEvalController::class, 'standarMutu'])->name('rekap-desk-eval.standar');
+        Route::get('rekap-desk-eval/standar/{lembagaId}/detail/{standarId}', [RekapDeskEvalController::class, 'standarDetail'])->name('rekap-desk-eval.standar-detail');
         Route::get('rekap-desk-eval/{id}', [RekapDeskEvalController::class, 'show'])->name('rekap-desk-eval.show');
         Route::get('laporan-ami', [LaporanAmiController::class, 'index'])->name('laporan-ami.index');
+        Route::get('laporan-ami/{laporanAmi}/download', [LaporanAmiController::class, 'download'])->name('laporan-ami.download');
     });
 
     // ── Auditor Menu ───────────────────────────────────────
@@ -100,9 +103,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ── Pengendalian & Peningkatan ─────────────────────────
-    Route::prefix('pengendalian')->name('pengendalian.')->middleware(['role:Admin|Auditor|Auditee|Fakultas'])->group(function () {
+    Route::prefix('pengendalian')->name('pengendalian.')->middleware(['role:Admin|Auditor|Auditee|Fakultas|Unit Penunjang'])->group(function () {
         Route::resource('daftar-temuan', DaftarTemuanController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('daftar-temuan/export', [DaftarTemuanController::class, 'export'])->name('daftar-temuan.export');
         Route::resource('kesesuaian', DaftarKesesuaianController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('kesesuaian/export', [DaftarKesesuaianController::class, 'export'])->name('kesesuaian.export');
         Route::resource('draft-rtm', DraftRtmController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('upload-rtm', UploadLaporanRtmController::class)->only(['index', 'store', 'destroy']);
     });

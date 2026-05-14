@@ -1,10 +1,95 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { ChevronLeft, Plus, Trash2, Edit2, FileCheck, Layers, MoreVertical } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { ChevronLeft, Plus, Trash2, Edit2, FileCheck, Layers } from 'lucide-vue-next';
+import { ref, defineComponent, h, type PropType } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import Modal from '@/components/Modal.vue';
+
+// ── Recursive SubStandarNode ──────────────────────────────────────────────────
+const SubStandarNode = defineComponent({
+    name: 'SubStandarNode',
+    props: {
+        node: { type: Object as PropType<any>, required: true },
+        depth: { type: Number, default: 0 },
+    },
+    emits: ['add-sub', 'edit-sub', 'delete-sub', 'add-indikator', 'edit-indikator', 'delete-indikator'],
+    setup(props, { emit }) {
+        return () => {
+            const { node, depth } = props;
+            const indentClass = depth === 0 ? '' : `ml-${Math.min(depth * 4, 16)}`;
+            const bgClass = depth % 2 === 0 ? 'bg-white' : 'bg-gray-50/60';
+
+            const childNodes = (node.children_recursive ?? []).map((child: any) =>
+                h(SubStandarNode, {
+                    key: child.id,
+                    node: child,
+                    depth: depth + 1,
+                    onAddSub: (n: any) => emit('add-sub', n),
+                    onEditSub: (n: any) => emit('edit-sub', n),
+                    onDeleteSub: (id: number) => emit('delete-sub', id),
+                    onAddIndikator: (id: number) => emit('add-indikator', id),
+                    onEditIndikator: (ind: any) => emit('edit-indikator', ind),
+                    onDeleteIndikator: (id: number) => emit('delete-indikator', id),
+                })
+            );
+
+            return h('div', { class: `border rounded-xl overflow-hidden shadow-sm ${bgClass} ${indentClass} mb-3` }, [
+                // Header row
+                h('div', { class: 'px-4 py-3 flex items-center justify-between border-b bg-gray-50' }, [
+                    h('div', { class: 'flex items-center gap-3' }, [
+                        h('span', { class: 'text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700' }, node.kode),
+                        h('span', { class: 'font-semibold text-sm text-gray-800' }, node.nama_standar),
+                        h('span', { class: 'text-[10px] text-gray-400 ml-1' }, `Level ${node.level ?? ''}`),
+                    ]),
+                    h('div', { class: 'flex items-center gap-1' }, [
+                        h('button', {
+                            type: 'button',
+                            title: 'Tambah Sub',
+                            class: 'p-1.5 text-xs text-blue-600 hover:bg-blue-50 rounded transition',
+                            onClick: () => emit('add-sub', node),
+                        }, '+ Sub'),
+                        h('button', {
+                            type: 'button',
+                            class: 'p-1.5 text-gray-400 hover:text-blue-600 rounded',
+                            onClick: () => emit('edit-sub', node),
+                        }, h(Edit2, { class: 'size-4' })),
+                        h('button', {
+                            type: 'button',
+                            class: 'p-1.5 text-gray-400 hover:text-red-500 rounded',
+                            onClick: () => emit('delete-sub', node.id),
+                        }, h(Trash2, { class: 'size-4' })),
+                    ]),
+                ]),
+                // Indikator section
+                h('div', { class: 'px-4 py-3 space-y-2' }, [
+                    h('div', { class: 'flex items-center justify-between text-xs font-medium text-gray-500 uppercase tracking-wider mb-1' }, [
+                        h('span', 'Indikator Penilaian'),
+                        h('button', {
+                            type: 'button',
+                            class: 'text-blue-600 hover:underline',
+                            onClick: () => emit('add-indikator', node.id),
+                        }, '+ Tambah'),
+                    ]),
+                    (node.indikator ?? []).length === 0
+                        ? h('p', { class: 'text-xs text-gray-400 italic' }, 'Belum ada indikator.')
+                        : (node.indikator ?? []).map((ind: any) =>
+                            h('div', { key: ind.id, class: 'flex items-start gap-3 p-2 rounded-lg border border-gray-100 bg-white group text-sm' }, [
+                                h('span', { class: 'inline-flex items-center justify-center size-5 rounded-full bg-blue-500 text-[10px] text-white font-bold shrink-0 mt-0.5' }, `${ind.bobot}%`),
+                                h('span', { class: 'flex-1 text-gray-700' }, ind.deskripsi),
+                                h('div', { class: 'flex gap-0.5 opacity-0 group-hover:opacity-100 transition' }, [
+                                    h('button', { type: 'button', class: 'p-1 text-gray-400 hover:text-blue-600', onClick: () => emit('edit-indikator', ind) }, h(Edit2, { class: 'size-3.5' })),
+                                    h('button', { type: 'button', class: 'p-1 text-gray-400 hover:text-red-500', onClick: () => emit('delete-indikator', ind.id) }, h(Trash2, { class: 'size-3.5' })),
+                                ]),
+                            ])
+                        ),
+                ]),
+                // Nested children
+                ...(childNodes.length ? [h('div', { class: 'px-4 pb-4 space-y-3' }, childNodes)] : []),
+            ]);
+        };
+    },
+});
 
 interface Indikator {
     id: number;
@@ -159,44 +244,18 @@ const confirmDelete = () => {
                     <div v-if="standar.children_recursive.length === 0" class="p-8 text-center border-2 border-dashed rounded-xl text-gray-400">
                         Belum ada sub-standar.
                     </div>
-                    <div v-for="child in standar.children_recursive" :key="child.id" class="border rounded-xl bg-white dark:bg-gray-900 overflow-hidden shadow-sm">
-                        <div class="p-4 flex items-center justify-between bg-gray-50 /50 border-b dark:border-gray-700">
-                            <div class="flex items-center gap-3">
-                                <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300">
-                                    {{ child.kode }}
-                                </span>
-                                <h3 class="font-semibold text-sm">{{ child.nama_standar }}</h3>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <button type="button" class="p-1.5 text-gray-400 hover:text-blue-600" @click="openEditSub(child)"><Edit2 class="size-4" /></button>
-                                <button type="button" class="p-1.5 text-gray-400 hover:text-red-500" @click="openDelete(child.id, 'sub')"><Trash2 class="size-4" /></button>
-                            </div>
-                        </div>
-                        
-                        <!-- Indicators for this sub-standard -->
-                        <div class="p-4 space-y-3">
-                            <div class="flex items-center justify-between text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <span>Indikator Penilaian</span>
-                                <button type="button" class="text-blue-600 hover:underline" @click="openCreateIndikator(child.id)">+ Tambah Indikator</button>
-                            </div>
-                            
-                            <div v-if="child.indikator.length === 0" class="text-xs text-gray-400 italic">Belum ada indikator.</div>
-                            <div v-for="ind in child.indikator" :key="ind.id" class="flex items-start gap-3 p-3 rounded-lg border border-gray-100 dark:border-gray-800 bg-gray-50/50 /30 group">
-                                <div class="mt-0.5">
-                                    <div class="flex items-center justify-center size-5 rounded-full bg-blue-500 text-[10px] text-white font-bold">
-                                        {{ ind.bobot }}%
-                                    </div>
-                                </div>
-                                <div class="flex-1 text-sm text-gray-700 dark:text-gray-300">
-                                    {{ ind.deskripsi }}
-                                </div>
-                                <div class="flex items-center opacity-0 group-hover:opacity-100 transition">
-                                    <button type="button" class="p-1 text-gray-400 hover:text-blue-600" @click="openEditIndikator(ind)"><Edit2 class="size-3.5" /></button>
-                                    <button type="button" class="p-1 text-gray-400 hover:text-red-500" @click="openDelete(ind.id, 'indikator')"><Trash2 class="size-3.5" /></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <SubStandarNode
+                        v-for="child in standar.children_recursive"
+                        :key="child.id"
+                        :node="child"
+                        :depth="0"
+                        @add-sub="openCreateSub"
+                        @edit-sub="openEditSub"
+                        @delete-sub="(id: number) => openDelete(id, 'sub')"
+                        @add-indikator="openCreateIndikator"
+                        @edit-indikator="openEditIndikator"
+                        @delete-indikator="(id: number) => openDelete(id, 'indikator')"
+                    />
                 </div>
             </div>
 

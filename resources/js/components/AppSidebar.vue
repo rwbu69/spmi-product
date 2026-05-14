@@ -41,11 +41,13 @@ interface NavChild {
     icon?: unknown;
 }
 
+// A nav item can be either a group (collapsible with children) or a direct link
 interface NavGroup {
     title: string;
     icon: unknown;
-    children: NavChild[];
-    roles?: string[]; // roles that can see this group. Empty = all roles.
+    href?: string;          // If set → direct link, no children
+    children?: NavChild[];  // If set → collapsible group
+    roles?: string[];
 }
 
 const openGroups = ref<Record<string, boolean>>({});
@@ -61,6 +63,7 @@ const isAdmin = computed(() => hasRole('Admin'));
 const isAuditor = computed(() => hasRole('Auditor'));
 const isFakultas = computed(() => hasRole('Fakultas'));
 const isAuditee = computed(() => hasRole('Auditee'));
+const isUnitPenunjang = computed(() => hasRole('Unit Penunjang'));
 
 const isActive = (href: string) => {
     if (page.url === href || page.url.startsWith(href + '?')) return true;
@@ -168,7 +171,8 @@ const adminNavGroups: NavGroup[] = [
         title: 'Pengaturan Sistem',
         icon: Settings,
         children: [
-            { title: 'Manajemen Pengguna', href: '/pengaturan/pengguna-backoffice' },
+            { title: 'Pengguna Backoffice', href: '/pengaturan/pengguna-backoffice' },
+            { title: 'Pengguna Portal',     href: '/pengaturan/pengguna-portal' },
         ],
     },
 ];
@@ -195,46 +199,27 @@ const auditorNavGroups: NavGroup[] = [
     },
 ];
 
-// AUDITEE nav groups
+// AUDITEE nav — direct links (no children/dropdown)
 const auditeeNavGroups: NavGroup[] = [
-    {
-        title: 'Evaluasi Diri',
-        icon: ClipboardList,
-        children: [
-            { title: 'Evaluasi Diri', href: '/pelaksanaan/evaluasi-diri' },
-        ],
-    },
-    {
-        title: 'Daftar Kesesuaian',
-        icon: ClipboardCheck,
-        children: [
-            { title: 'Daftar Kesesuaian', href: '/pengendalian/kesesuaian' },
-        ],
-    },
-    {
-        title: 'Daftar Temuan',
-        icon: FileText,
-        children: [
-            { title: 'Daftar Temuan', href: '/pengendalian/daftar-temuan' },
-        ],
-    },
-    {
-        title: 'Manajemen Dokumen',
-        icon: FolderOpen,
-        children: [
-            { title: 'Manajemen Dokumen', href: '/dokumen/manajemen' },
-        ],
-    },
-    {
-        title: 'Laporan AMI',
-        icon: FileSearch,
-        children: [
-            { title: 'Laporan AMI', href: '/ami/laporan-ami' },
-        ],
-    },
+    { title: 'Evaluasi Diri',       icon: ClipboardList,  href: '/pelaksanaan/evaluasi-diri' },
+    { title: 'Daftar Kesesuaian',   icon: ClipboardCheck, href: '/pengendalian/kesesuaian' },
+    { title: 'Daftar Temuan',       icon: FileText,       href: '/pengendalian/daftar-temuan' },
+    { title: 'Hasil Desk Evaluation', icon: FileSearch,   href: '/ami/rekap-desk-eval' },
+    { title: 'Manajemen Dokumen',   icon: FolderOpen,     href: '/dokumen/manajemen' },
+    { title: 'Laporan AMI',         icon: Download,       href: '/ami/laporan-ami' },
 ];
 
-// FAKULTAS nav groups (same as admin minus pengaturan sistem)
+// UNIT PENUNJANG nav — direct links (same as Auditee)
+const unitPenunjangNavGroups: NavGroup[] = [
+    { title: 'Evaluasi Diri',       icon: ClipboardList,  href: '/pelaksanaan/evaluasi-diri' },
+    { title: 'Daftar Kesesuaian',   icon: ClipboardCheck, href: '/pengendalian/kesesuaian' },
+    { title: 'Daftar Temuan',       icon: FileText,       href: '/pengendalian/daftar-temuan' },
+    { title: 'Hasil Desk Evaluation', icon: FileSearch,   href: '/ami/rekap-desk-eval' },
+    { title: 'Manajemen Dokumen',   icon: FolderOpen,     href: '/dokumen/manajemen' },
+    { title: 'Laporan AMI',         icon: Download,       href: '/ami/laporan-ami' },
+];
+
+// FAKULTAS nav groups
 const fakultasNavGroups: NavGroup[] = [
     {
         title: 'Evaluasi AMI',
@@ -266,6 +251,7 @@ const navGroups = computed<NavGroup[]>(() => {
     if (isAdmin.value) return adminNavGroups;
     if (isAuditor.value) return auditorNavGroups;
     if (isAuditee.value) return auditeeNavGroups;
+    if (isUnitPenunjang.value) return unitPenunjangNavGroups;
     if (isFakultas.value) return fakultasNavGroups;
     return adminNavGroups; // fallback
 });
@@ -289,29 +275,45 @@ const navGroups = computed<NavGroup[]>(() => {
                     </SidebarMenuButton>
                 </SidebarMenuItem>
 
-                <!-- Grouped nav items -->
+                <!-- Nav items: Direct link OR collapsible group -->
                 <SidebarMenuItem v-for="group in navGroups" :key="group.title">
+                    <!-- Direct link (Auditee/Unit Penunjang flat nav) -->
                     <SidebarMenuButton
-                        @click="state === 'expanded' ? toggleGroup(group.title) : null"
-                        @mouseenter="(e) => state === 'collapsed' && showFlyout(e, group.title)"
-                        @mouseleave="hideFlyout"
-                        :isActive="group.children.some(c => isActive(c.href))"
+                        v-if="group.href"
+                        as-child
+                        :tooltip="group.title"
+                        :isActive="isActive(group.href)"
                     >
-                        <component :is="group.icon" />
-                        <span>{{ group.title }}</span>
-                        <ChevronDown
-                            class="ml-auto transition-transform duration-200"
-                            :class="{ 'rotate-180': openGroups[group.title] }"
-                        />
+                        <Link :href="group.href">
+                            <component :is="group.icon" />
+                            <span>{{ group.title }}</span>
+                        </Link>
                     </SidebarMenuButton>
 
-                    <SidebarMenuSub v-show="state === 'expanded' && openGroups[group.title]">
-                        <SidebarMenuSubItem v-for="child in group.children" :key="child.href">
-                            <SidebarMenuSubButton as-child :isActive="isActive(child.href)">
-                                <Link :href="child.href">{{ child.title }}</Link>
-                            </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                    </SidebarMenuSub>
+                    <!-- Collapsible group (Admin, Auditor, Fakultas) -->
+                    <template v-else>
+                        <SidebarMenuButton
+                            @click="state === 'expanded' ? toggleGroup(group.title) : null"
+                            @mouseenter="(e) => state === 'collapsed' && showFlyout(e, group.title)"
+                            @mouseleave="hideFlyout"
+                            :isActive="group.children?.some(c => isActive(c.href))"
+                        >
+                            <component :is="group.icon" />
+                            <span>{{ group.title }}</span>
+                            <ChevronDown
+                                class="ml-auto transition-transform duration-200"
+                                :class="{ 'rotate-180': openGroups[group.title] }"
+                            />
+                        </SidebarMenuButton>
+
+                        <SidebarMenuSub v-show="state === 'expanded' && openGroups[group.title]">
+                            <SidebarMenuSubItem v-for="child in group.children" :key="child.href">
+                                <SidebarMenuSubButton as-child :isActive="isActive(child.href)">
+                                    <Link :href="child.href">{{ child.title }}</Link>
+                                </SidebarMenuSubButton>
+                            </SidebarMenuSubItem>
+                        </SidebarMenuSub>
+                    </template>
                 </SidebarMenuItem>
             </SidebarMenu>
         </SidebarContent>
@@ -321,7 +323,7 @@ const navGroups = computed<NavGroup[]>(() => {
         </SidebarFooter>
     </Sidebar>
 
-    <!-- Flyout Menu (Teleport) -->
+    <!-- Flyout Menu (Teleport) - only for collapsible groups -->
     <Teleport to="body">
         <Transition
             enter-active-class="transition ease-out duration-200"
@@ -339,7 +341,7 @@ const navGroups = computed<NavGroup[]>(() => {
                 @mouseleave="hideFlyout"
             >
                 <template v-for="group in navGroups" :key="group.title">
-                    <div v-if="hoveredGroup === group.title" class="flex flex-col">
+                    <div v-if="hoveredGroup === group.title && group.children" class="flex flex-col">
                         <div class="px-3 pb-2 pt-1 font-semibold text-white">{{ group.title }}</div>
                         <div class="h-px bg-[#3d3d3d] mb-1"></div>
                         <Link

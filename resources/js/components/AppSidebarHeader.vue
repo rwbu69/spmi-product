@@ -37,7 +37,10 @@ const notifications = computed(() => page.props.notifications || []);
                 <DropdownMenuTrigger as-child>
                     <button class="relative p-2 hover:bg-blue-700 rounded-full transition outline-none">
                         <Bell class="size-5 text-white" />
-                        <span v-if="notifications.length" class="absolute right-2 top-2 size-2 rounded-full bg-red-400 border-2 border-blue-600"></span>
+                        <span
+                            v-if="notifications.length"
+                            class="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-green-400 text-[10px] font-bold text-white border-2 border-blue-600"
+                        >{{ notifications.length }}</span>
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" class="w-80 mt-2 p-0 border-gray-100 shadow-xl overflow-hidden rounded-xl">

@@ -15,10 +15,11 @@ class RoleSeeder extends Seeder
         // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // Create the 4 roles as requested
+        // Create the 5 roles
         Role::firstOrCreate(['name' => 'Admin']);
         Role::firstOrCreate(['name' => 'Auditor']);
         Role::firstOrCreate(['name' => 'Fakultas']);
         Role::firstOrCreate(['name' => 'Auditee']);
+        Role::firstOrCreate(['name' => 'Unit Penunjang']);
     }
 }
