@@ -62,7 +62,7 @@ const openEdit = (item: LaporanAmi) => {
     editTarget.value = item;
     form.pengaturan_periode_id = item.pengaturan_periode.id.toString();
     form.auditee_id = item.auditee.id.toString();
-    form.tanggal_laporan = item.tanggal_laporan;
+    form.tanggal_laporan = item.tanggal_laporan ? item.tanggal_laporan.substring(0, 10) : '';
     form.status = item.status;
     form.file_laporan = null;
     showForm.value = true;

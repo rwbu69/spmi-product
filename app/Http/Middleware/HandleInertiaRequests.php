@@ -204,24 +204,24 @@ class HandleInertiaRequests extends Middleware
 
                     // Expiring auditee warning — Admin/Fakultas/other only (not Auditor/Auditee)
                     // One notification per expiring auditee so they each appear individually.
-                    // Use a timestamp slightly in the future so they always sort above regular activity.
-                    $nextYear = (int) now()->format('Y') + 1;
-                    $expiringAuditees = \App\Models\Auditee::whereNotNull('sk_tanggal')
-                        ->whereRaw('YEAR(DATE_ADD(sk_tanggal, INTERVAL 5 YEAR)) = ?', [$nextYear])
-                        ->get(['id', 'nama_auditee', 'jenjang', 'sk_tanggal']);
+                    // Uses sk_tanggal_selesai (accreditation end date) for precise expiry tracking.
+                    $expiringAuditees = \App\Models\Auditee::whereNotNull('sk_tanggal_selesai')
+                        ->where('sk_tanggal_selesai', '<=', now()->addYear())
+                        ->get(['id', 'nama_auditee', 'jenjang', 'sk_tanggal_selesai']);
 
                     foreach ($expiringAuditees as $i => $ea) {
                         // Increment by $i seconds to keep them ordered and above normal activities
                         $expiredAt = now()->addSeconds($i + 1);
-                        $expiredYear = $ea->sk_tanggal
-                            ? \Carbon\Carbon::parse($ea->sk_tanggal)->addYears(5)->year
-                            : $nextYear;
+                        $expiredDate = \Carbon\Carbon::parse($ea->sk_tanggal_selesai);
+                        $isExpired = $expiredDate->isPast();
 
                         $activities[] = [
                             'title'      => 'Pemberitahuan Auditee Expired',
-                            'message'    => "{$ea->nama_auditee} akan Expired pada tahun {$expiredYear}",
+                            'message'    => $isExpired
+                                ? "{$ea->nama_auditee} telah Expired pada {$expiredDate->format('d-m-Y')}"
+                                : "{$ea->nama_auditee} akan Expired pada {$expiredDate->format('d-m-Y')}",
                             'updated_at' => $expiredAt,
-                            'time'       => "Tahun {$expiredYear}",
+                            'time'       => $expiredDate->format('d-m-Y'),
                             'type'       => 'red',
                             'link'       => route('referensi.auditee.index'),
                         ];
@@ -237,6 +237,15 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        // Resolve active period year
+        $periodeAktif = null;
+        try {
+            $aktif = \App\Models\TahunPeriode::where('status', 'Aktif')->first();
+            $periodeAktif = $aktif?->tahun;
+        } catch (\Exception $e) {
+            // Silently ignore
+        }
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -245,6 +254,7 @@ class HandleInertiaRequests extends Middleware
                 'roles' => $request->user() ? $request->user()->getRoleNames()->toArray() : [],
                 'role'  => $request->user() ? ($request->user()->getRoleNames()->first() ?? '') : '',
             ],
+            'periodeAktif'  => $periodeAktif,
             'notifications' => $notifications,
             'sidebarOpen'   => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'flash' => [

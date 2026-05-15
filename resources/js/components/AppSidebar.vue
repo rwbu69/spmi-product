@@ -209,10 +209,9 @@ const auditeeNavGroups: NavGroup[] = [
     { title: 'Laporan AMI',         icon: Download,       href: '/ami/laporan-ami' },
 ];
 
-// UNIT PENUNJANG nav — direct links (same as Auditee)
+// UNIT PENUNJANG nav — same as Auditee except no Daftar Kesesuaian
 const unitPenunjangNavGroups: NavGroup[] = [
     { title: 'Evaluasi Diri',       icon: ClipboardList,  href: '/pelaksanaan/evaluasi-diri' },
-    { title: 'Daftar Kesesuaian',   icon: ClipboardCheck, href: '/pengendalian/kesesuaian' },
     { title: 'Daftar Temuan',       icon: FileText,       href: '/pengendalian/daftar-temuan' },
     { title: 'Hasil Desk Evaluation', icon: FileSearch,   href: '/ami/rekap-desk-eval' },
     { title: 'Manajemen Dokumen',   icon: FolderOpen,     href: '/dokumen/manajemen' },

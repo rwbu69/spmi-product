@@ -106,15 +106,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('pengendalian')->name('pengendalian.')->middleware(['role:Admin|Auditor|Auditee|Fakultas|Unit Penunjang'])->group(function () {
         Route::resource('daftar-temuan', DaftarTemuanController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::get('daftar-temuan/export', [DaftarTemuanController::class, 'export'])->name('daftar-temuan.export');
-        Route::resource('kesesuaian', DaftarKesesuaianController::class)->only(['index', 'store', 'update', 'destroy']);
-        Route::get('kesesuaian/export', [DaftarKesesuaianController::class, 'export'])->name('kesesuaian.export');
         Route::resource('draft-rtm', DraftRtmController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('upload-rtm', UploadLaporanRtmController::class)->only(['index', 'store', 'destroy']);
     });
 
+    // Kesesuaian — accessible by all pengendalian roles EXCEPT Unit Penunjang
+    Route::prefix('pengendalian')->name('pengendalian.')->middleware(['role:Admin|Auditor|Auditee|Fakultas'])->group(function () {
+        Route::resource('kesesuaian', DaftarKesesuaianController::class)->only(['index', 'store', 'update', 'destroy']);
+        Route::get('kesesuaian/export', [DaftarKesesuaianController::class, 'export'])->name('kesesuaian.export');
+    });
+
     // ── Pengaturan Sistem ──────────────────────────────────
     Route::prefix('pengaturan')->name('pengaturan.')->middleware(['role:Admin'])->group(function () {
-        Route::resource('pengguna-portal', PenggunaPortalController::class)->except(['create', 'edit', 'show']);
+        Route::resource('pengguna-portal', PenggunaPortalController::class)
+            ->parameters(['pengguna-portal' => 'user'])
+            ->except(['create', 'edit', 'show']);
         Route::resource('pengguna-backoffice', PenggunaBackofficeController::class)
             ->parameters(['pengguna-backoffice' => 'user'])
             ->except(['create', 'edit', 'show']);

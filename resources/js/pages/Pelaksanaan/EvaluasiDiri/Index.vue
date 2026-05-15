@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { Edit2, Plus, Search, Trash2, AlertTriangle, X } from 'lucide-vue-next';
+import { Edit2, Plus, Search, Trash2, AlertTriangle, X, CheckCircle, Clock } from 'lucide-vue-next';
 import { ref, watch, computed } from 'vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
@@ -11,6 +11,8 @@ interface PeriodeAlert {
     mulai: string;
     selesai: string;
     hari_lewat: number;
+    is_active: boolean;
+    is_expired: boolean;
 }
 
 interface EvaluasiDiri {
@@ -27,6 +29,7 @@ const props = defineProps<{
     periodeList: { id: number; label: string }[];
     auditeeList: { id: number; nama_auditee: string }[];
     periodeAlerts?: PeriodeAlert[];
+    lembagaCount?: number;
 }>();
 
 defineOptions({ layout: AppLayout });
@@ -95,29 +98,42 @@ const getStatusBadge = (s: string) => ({
         </div>
 
         <!-- ════════════════════════════════════════════════════════ -->
-        <!-- AUDITEE VIEW: period count + expired alert banners only -->
+        <!-- AUDITEE / UNIT PENUNJANG VIEW                         -->
         <!-- ════════════════════════════════════════════════════════ -->
         <template v-if="isAuditee">
-            <!-- Period count badge -->
+            <!-- Period count badge: Total Lembaga Akreditasi in this active period -->
             <div class="flex items-center gap-2">
                 <span class="text-sm text-gray-700 font-medium">Total Lembaga Akreditasi Periode Ini :</span>
-                <span class="inline-flex size-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white">{{ periodeList.length }}</span>
+                <span class="inline-flex size-6 items-center justify-center rounded-full bg-orange-500 text-xs font-bold text-white">{{ lembagaCount ?? 0 }}</span>
             </div>
 
-            <!-- Alert banners for expired periods -->
+            <!-- Alert banners for each Lembaga Akreditasi entry in the active period -->
             <div
                 v-for="(alert, idx) in activeAlerts"
                 :key="idx"
-                class="relative flex items-start gap-3 rounded-lg bg-red-500 px-5 py-4 text-white"
+                class="relative flex items-start gap-3 rounded-lg px-5 py-4 text-white"
+                :class="alert.is_expired ? 'bg-red-500' : (alert.is_active ? 'bg-green-500' : 'bg-gray-400')"
             >
-                <AlertTriangle class="size-5 flex-shrink-0 mt-0.5" />
+                <AlertTriangle v-if="alert.is_expired" class="size-5 flex-shrink-0 mt-0.5" />
+                <Clock v-else-if="alert.is_active" class="size-5 flex-shrink-0 mt-0.5" />
+                <CheckCircle v-else class="size-5 flex-shrink-0 mt-0.5" />
                 <div class="flex-1">
-                    <p class="font-bold text-sm">{{ alert.label }}</p>
+                    <p class="font-bold text-sm">⚠ {{ alert.label }}</p>
                     <p class="text-sm mt-0.5">
-                        Jadwal Evaluasi Diri sudah berlangsung pada tanggal
-                        <strong>{{ alert.mulai }}</strong> sampai dengan
-                        <strong>{{ alert.selesai }}</strong> dan sudah lewat selama
-                        <strong>{{ alert.hari_lewat }}</strong> hari.
+                        <template v-if="alert.is_expired">
+                            Jadwal Evaluasi Diri sudah berlangsung pada tanggal
+                            <strong>{{ alert.mulai }}</strong> sampai dengan
+                            <strong>{{ alert.selesai }}</strong> dan sudah lewat selama
+                            <strong>{{ alert.hari_lewat }}</strong> hari.
+                        </template>
+                        <template v-else-if="alert.is_active">
+                            Jadwal Evaluasi Diri sedang berlangsung dari tanggal
+                            <strong>{{ alert.mulai }}</strong> sampai dengan
+                            <strong>{{ alert.selesai }}</strong>.
+                        </template>
+                        <template v-else>
+                            Jadwal Evaluasi Diri: <strong>{{ alert.mulai }}</strong> - <strong>{{ alert.selesai }}</strong>
+                        </template>
                     </p>
                 </div>
                 <button @click="dismissAlert(idx)" class="flex-shrink-0 text-white/70 hover:text-white transition">
@@ -126,7 +142,7 @@ const getStatusBadge = (s: string) => ({
             </div>
 
             <!-- Empty state when no periods -->
-            <div v-if="periodeList.length === 0" class="rounded-lg border border-dashed border-gray-200 py-12 text-center text-gray-400">
+            <div v-if="(lembagaCount ?? 0) === 0" class="rounded-lg border border-dashed border-gray-200 py-12 text-center text-gray-400">
                 Belum ada periode evaluasi aktif.
             </div>
         </template>
