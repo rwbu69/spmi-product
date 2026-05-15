@@ -15,6 +15,7 @@ import {
 const page = usePage();
 const user = computed(() => page.props.auth.user);
 const notifications = computed(() => page.props.notifications || []);
+const periodeAktif = computed(() => (page.props as any).periodeAktif ?? '-');
 </script>
 
 <template>
@@ -32,7 +33,7 @@ const notifications = computed(() => page.props.notifications || []);
             </div>
         </div>
         <div class="flex items-center gap-6">
-            <span class="text-sm font-medium">Periode Aktif : 2025</span>
+            <span class="text-sm font-medium">Periode Aktif : {{ periodeAktif }}</span>
             <DropdownMenu>
                 <DropdownMenuTrigger as-child>
                     <button class="relative p-2 hover:bg-blue-700 rounded-full transition outline-none">

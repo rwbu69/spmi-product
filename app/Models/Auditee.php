@@ -19,11 +19,14 @@ class Auditee extends Model
         'akreditasi',
         'sk_no',
         'sk_tanggal',
+        'sk_tanggal_selesai',
         'sk_file_path',
+        'keterangan',
     ];
 
     protected $casts = [
         'sk_tanggal' => 'date',
+        'sk_tanggal_selesai' => 'date',
     ];
 
     public function auditeePusat(): BelongsTo

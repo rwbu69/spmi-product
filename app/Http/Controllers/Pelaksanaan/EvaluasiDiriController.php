@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Auditee;
 use App\Models\EvaluasiDiri;
 use App\Models\PengaturanPeriode;
+use App\Models\TahunPeriode;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -16,6 +17,9 @@ class EvaluasiDiriController extends Controller
     public function index(Request $request): Response
     {
         $isAuditee = auth()->user()?->hasAnyRole(['Auditee', 'Unit Penunjang']);
+
+        // Get active TahunPeriode
+        $aktivPeriode = TahunPeriode::where('status', 'Aktif')->first();
 
         $query = EvaluasiDiri::with(['auditee', 'pengaturanPeriode.tahunPeriode', 'pengaturanPeriode.lembagaAkreditasi']);
 
@@ -31,27 +35,47 @@ class EvaluasiDiriController extends Controller
 
         $data = $query->latest()->paginate(10)->withQueryString();
 
+        // Build the full periode list for Admin filter
         $periodeList = PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get()->map(fn ($p) => [
             'id'    => $p->id,
             'label' => "{$p->lembagaAkreditasi->nama_lembaga} [{$p->tahunPeriode->tahun}]",
         ]);
 
-        // Build period alert banners for Auditee (expired periods)
+        // Build period alerts for Auditee/Unit Penunjang view
+        // Show entries from PengaturanPeriode that belong to the active TahunPeriode
+        // (these are the lembaga akreditasi that Admin has configured for this period)
         $periodeAlerts = [];
-        if ($isAuditee) {
-            $allPeriode = PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get();
-            foreach ($allPeriode as $p) {
-                // Assume tanggal_mulai / tanggal_selesai fields exist, fallback gracefully
-                $selesai = $p->tanggal_selesai ?? null;
-                if ($selesai && now()->isAfter($selesai)) {
-                    $hariLewat = now()->diffInDays($selesai);
-                    $periodeAlerts[] = [
-                        'label'      => "{$p->lembagaAkreditasi->nama_lembaga} [{$p->tahunPeriode->tahun}]",
-                        'mulai'      => optional($p->tanggal_mulai)->format('d-m-Y') ?? '-',
-                        'selesai'    => optional($selesai)->format('d-m-Y') ?? '-',
-                        'hari_lewat' => $hariLewat,
-                    ];
+        $lembagaCount = 0;
+        if ($isAuditee && $aktivPeriode) {
+            $periodeEntries = PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])
+                ->where('tahun_periode_id', $aktivPeriode->id)
+                ->get();
+
+            $lembagaCount = $periodeEntries->count();
+
+            foreach ($periodeEntries as $p) {
+                $mulai = $p->mulai_evaluasi_diri;
+                $selesai = $p->akhir_evaluasi_diri;
+
+                $alert = [
+                    'label'      => "{$p->lembagaAkreditasi->nama_lembaga} [{$p->tahunPeriode->tahun}]",
+                    'mulai'      => $mulai ? $mulai->format('d-m-Y') : '-',
+                    'selesai'    => $selesai ? $selesai->format('d-m-Y') : '-',
+                    'hari_lewat' => 0,
+                    'is_active'  => false,
+                    'is_expired' => false,
+                ];
+
+                if ($mulai && $selesai) {
+                    if (now()->between($mulai, $selesai)) {
+                        $alert['is_active'] = true;
+                    } elseif (now()->isAfter($selesai)) {
+                        $alert['is_expired'] = true;
+                        $alert['hari_lewat'] = (int) now()->diffInDays($selesai);
+                    }
                 }
+
+                $periodeAlerts[] = $alert;
             }
         }
 
@@ -61,6 +85,7 @@ class EvaluasiDiriController extends Controller
             'periodeList'   => $periodeList,
             'auditeeList'   => Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']),
             'periodeAlerts' => $periodeAlerts,
+            'lembagaCount'  => $lembagaCount,
         ]);
     }
 

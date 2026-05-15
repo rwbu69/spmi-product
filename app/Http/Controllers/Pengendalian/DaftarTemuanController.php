@@ -22,7 +22,21 @@ class DaftarTemuanController extends Controller
             'auditee:id,nama_auditee',
             'pengaturanPeriode.tahunPeriode:id,tahun',
             'pengaturanPeriode.lembagaAkreditasi:id,nama_lembaga',
+            'temuan.deskEvaluation.indikator.standarMutu:id,kode,nama_standar',
+            'temuan:id,desk_evaluation_id,deskripsi,rekomendasi',
+            'rencanaTindakLanjut',
         ]);
+
+        // Scope to current user's auditee for Auditee/Unit Penunjang
+        $user = auth()->user();
+        if ($user && $user->hasAnyRole(['Auditee', 'Unit Penunjang'])) {
+            $auditeeId = $user->auditee_id;
+            $unitId = $user->unit_penunjang_id;
+
+            if ($auditeeId) {
+                $query->where('auditee_id', $auditeeId);
+            }
+        }
 
         if ($request->search) {
             $query->where('uraian_temuan', 'like', "%{$request->search}%");
@@ -45,11 +59,12 @@ class DaftarTemuanController extends Controller
 
     public function index(Request $request): Response
     {
-        $data = $this->buildQuery($request)->latest()->paginate(10)->withQueryString();
+        $perPage = min((int) ($request->per_page ?? 10), 100);
+        $data = $this->buildQuery($request)->latest()->paginate($perPage)->withQueryString();
 
         return Inertia::render('Pengendalian/DaftarTemuan/Index', [
             'data'        => $data,
-            'filters'     => $request->only(['search', 'periode_id', 'tahun_id', 'lembaga_id']),
+            'filters'     => $request->only(['search', 'periode_id', 'tahun_id', 'lembaga_id', 'per_page']),
             'periodeList' => PengaturanPeriode::with(['tahunPeriode', 'lembagaAkreditasi'])->get()->map(fn ($p) => [
                 'id'    => $p->id,
                 'label' => "Periode {$p->tahunPeriode->tahun} - {$p->lembagaAkreditasi->nama_lembaga}",
@@ -75,15 +90,22 @@ class DaftarTemuanController extends Controller
             $handle = fopen('php://output', 'w');
             fputs($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
 
-            fputcsv($handle, ['No', 'Auditee', 'Uraian Temuan', 'Jenis', 'Status', 'Periode', 'Lembaga']);
+            fputcsv($handle, ['No', 'Standar Mutu', 'Deskripsi', 'Nilai Mutu', 'Daftar Temuan', 'Tindak Lanjut', 'Status', 'Auditee', 'Periode', 'Lembaga']);
 
             foreach ($items as $i => $item) {
+                $standar = $item->temuan?->deskEvaluation?->indikator?->standarMutu;
+                $deskEval = $item->temuan?->deskEvaluation;
+                $rtl = $item->rencanaTindakLanjut->pluck('uraian_rtm')->join('; ');
+
                 fputcsv($handle, [
                     $i + 1,
-                    $item->auditee->nama_auditee ?? '-',
+                    $standar ? "[{$standar->kode}] {$standar->nama_standar}" : '-',
+                    $item->temuan?->deskripsi ?? '-',
+                    $deskEval?->nilai ?? '-',
                     $item->uraian_temuan,
-                    $item->jenis,
+                    $rtl ?: '-',
                     $item->status,
+                    $item->auditee->nama_auditee ?? '-',
                     $item->pengaturanPeriode->tahunPeriode->tahun ?? '-',
                     $item->pengaturanPeriode->lembagaAkreditasi->nama_lembaga ?? '-',
                 ]);

@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { Mail, Key, User, Shield } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 import ConfirmDeleteModal from '@/components/ConfirmDeleteModal.vue';
 import AppLayout from '@/layouts/AppLayout.vue';
 import Pagination from '@/components/Pagination.vue';
 import { PageHeader, DataTable, FormModal } from '@/components/index';
-import { BaseButton, BaseInput, BaseSelect } from '@/components/index';
+import { BaseButton, BaseInput, BaseTextarea, BaseSelect } from '@/components/index';
 import { FormField, FormActions, SearchInput } from '@/components/index';
 
 interface Role { id: number; name: string }
+interface AuditeePusat { id: number; nama: string }
 interface UserItem {
     id: number;
     name: string;
     username: string;
-    email: string;
     roles: Role[];
+    keterangan: string | null;
+    is_active: boolean;
+    auditee_pusat_id: number | null;
+    unit_display: string;
 }
 
 const props = defineProps<{
@@ -26,42 +29,42 @@ const props = defineProps<{
         current_page: number;
         per_page: number;
     };
-    filters: { search?: string; role?: string };
-    roleList: Role[];
+    filters: { search?: string };
+    auditeePusatList: AuditeePusat[];
 }>();
 
 defineOptions({ layout: AppLayout });
 
 const search = ref(props.filters.search ?? '');
-const filterRole = ref(props.filters.role ?? '');
-
-const ROLE_COLORS: Record<string, string> = {
-    Admin:           'bg-purple-100 text-purple-700',
-    Auditor:         'bg-blue-100 text-blue-700',
-    Fakultas:        'bg-teal-100 text-teal-700',
-    Auditee:         'bg-orange-100 text-orange-700',
-    'Unit Penunjang': 'bg-green-100 text-green-700',
-};
-const roleColor = (name: string) => ROLE_COLORS[name] ?? 'bg-gray-100 text-gray-700';
 
 let searchTimeout: any;
-watch([search, filterRole], () => {
+watch(search, () => {
     clearTimeout(searchTimeout);
     searchTimeout = setTimeout(() => {
-        router.get('/pengaturan/pengguna-backoffice', { search: search.value, role: filterRole.value }, { preserveState: true, replace: true });
+        router.get('/pengaturan/pengguna-backoffice', { search: search.value }, { preserveState: true, replace: true });
     }, 400);
 });
 
 const showForm = ref(false);
 const editTarget = ref<UserItem | null>(null);
-const form = useForm({ name: '', username: '', email: '', password: '', role: '' });
+const form = useForm({
+    name: '',
+    username: '',
+    password: '',
+    auditee_pusat_id: '' as string | number,
+    keterangan: '',
+    is_active: true,
+});
 
 const openCreate = () => { editTarget.value = null; form.reset(); form.clearErrors(); showForm.value = true; };
 const openEdit = (item: UserItem) => {
     editTarget.value = item;
-    form.name = item.name; form.username = item.username;
-    form.email = item.email; form.password = '';
-    form.role = item.roles[0]?.name ?? '';
+    form.name = item.name;
+    form.username = item.username;
+    form.password = '';
+    form.auditee_pusat_id = item.auditee_pusat_id ?? '';
+    form.keterangan = item.keterangan ?? '';
+    form.is_active = item.is_active ?? true;
     form.clearErrors(); showForm.value = true;
 };
 const closeForm = () => { showForm.value = false; editTarget.value = null; form.reset(); form.clearErrors(); };
@@ -91,63 +94,32 @@ const confirmDelete = () => {
     <Head title="Pengguna Backoffice" />
     <div class="space-y-6 p-6">
 
-        <PageHeader title="Manajemen Pengguna" subtitle="Kelola akun pengguna dan penugasan role">
+        <PageHeader title="Manajemen Pengguna" subtitle="Kelola akun pengguna backoffice (Admin)">
             <template #actions>
                 <BaseButton variant="primary" @click="openCreate">
-                    Tambah Pengguna
+                    Tambah
                 </BaseButton>
             </template>
         </PageHeader>
 
-        <!-- Filter Bar -->
-        <div class="flex flex-wrap items-center gap-3">
-            <SearchInput v-model="search" placeholder="Cari nama, username, atau email..." />
-            <BaseSelect v-model="filterRole">
-                <option value="">Semua Role</option>
-                <option v-for="r in roleList" :key="r.id" :value="r.name">{{ r.name }}</option>
-            </BaseSelect>
-        </div>
+        <SearchInput v-model="search" placeholder="Cari nama atau username..." />
 
-        <DataTable :is-empty="data.data.length === 0" empty-message="Tidak ada pengguna terdaftar." :col-span="6">
+        <!-- Table matching Foto 4: No, Aksi, Nama Pengguna, Nama Lengkap, Group, Unit, Status -->
+        <DataTable :is-empty="data.data.length === 0" empty-message="Tidak ada pengguna terdaftar." :col-span="7">
             <template #head>
                 <th class="px-4 py-3 font-medium text-gray-600">No</th>
+                <th class="px-4 py-3 font-medium text-gray-600">Aksi</th>
+                <th class="px-4 py-3 font-medium text-gray-600">Nama Pengguna</th>
                 <th class="px-4 py-3 font-medium text-gray-600">Nama Lengkap</th>
-                <th class="px-4 py-3 font-medium text-gray-600">Username</th>
-                <th class="px-4 py-3 font-medium text-gray-600">Email</th>
-                <th class="px-4 py-3 font-medium text-gray-600">Role</th>
-                <th class="px-4 py-3 text-center font-medium text-gray-600">Aksi</th>
+                <th class="px-4 py-3 font-medium text-gray-600">Group</th>
+                <th class="px-4 py-3 font-medium text-gray-600">Unit</th>
+                <th class="px-4 py-3 font-medium text-gray-600">Status</th>
             </template>
 
             <tr v-for="(item, i) in data.data" :key="item.id" class="bg-white hover:bg-gray-50 transition">
                 <td class="px-4 py-3 text-gray-500">{{ (data.current_page - 1) * data.per_page + i + 1 }}</td>
-                <td class="px-4 py-3 font-medium text-gray-900">
-                    <div class="flex items-center gap-2">
-                        <div class="size-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 font-bold text-xs">
-                            {{ item.name.charAt(0).toUpperCase() }}
-                        </div>
-                        {{ item.name }}
-                    </div>
-                </td>
-                <td class="px-4 py-3 text-gray-500">
-                    <div class="flex items-center gap-1.5">
-                        <User class="size-3.5 text-gray-400" /> {{ item.username }}
-                    </div>
-                </td>
-                <td class="px-4 py-3 text-gray-500">
-                    <div class="flex items-center gap-1.5">
-                        <Mail class="size-3.5" /> {{ item.email }}
-                    </div>
-                </td>
                 <td class="px-4 py-3">
-                    <span v-for="role in item.roles" :key="role.id"
-                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase"
-                        :class="roleColor(role.name)">
-                        <Shield class="size-2.5" /> {{ role.name }}
-                    </span>
-                    <span v-if="item.roles.length === 0" class="text-gray-400 text-xs">Belum ada role</span>
-                </td>
-                <td class="px-4 py-3">
-                    <div class="flex items-center justify-center gap-1">
+                    <div class="flex items-center gap-1">
                         <BaseButton variant="ghost" size="sm" icon-only title="Edit" @click="openEdit(item)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-blue-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </BaseButton>
@@ -156,45 +128,90 @@ const confirmDelete = () => {
                         </BaseButton>
                     </div>
                 </td>
+                <td class="px-4 py-3 text-gray-700">{{ item.username }}</td>
+                <td class="px-4 py-3 font-medium text-gray-900">{{ item.name }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ item.roles[0]?.name ?? '-' }}</td>
+                <td class="px-4 py-3 text-gray-500">{{ item.unit_display || '-' }}</td>
+                <td class="px-4 py-3">
+                    <span :class="item.is_active ? 'text-green-600' : 'text-red-500'" class="text-sm font-medium">
+                        {{ item.is_active ? 'aktif' : 'tidak aktif' }}
+                    </span>
+                </td>
             </tr>
         </DataTable>
 
         <Pagination :links="data.links" :total="data.total" />
+
+        <!-- Petunjuk section matching Foto 4 -->
+        <div class="rounded-xl border border-gray-200 bg-white p-6">
+            <h3 class="text-base font-semibold text-blue-700 mb-3">Petunjuk:</h3>
+            <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                <li>Pengguna dapat dicari dengan menggunakan nama pengguna ataupun nama asli.</li>
+                <li><span class="text-blue-600 font-medium">Nama pengguna</span> adalah nama yang dipakai untuk login, sedangkan <span class="text-blue-600 font-medium">nama asli</span> adalah nama asli dari pengguna tersebut.</li>
+            </ul>
+        </div>
     </div>
 
-    <FormModal :show="showForm" :title="editTarget ? 'Edit Pengguna' : 'Tambah Pengguna Baru'" max-width="md" @close="closeForm">
-        <form @submit.prevent="submit" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="sm:col-span-2">
-                <FormField label="Nama Lengkap" :required="true" :error="form.errors.name">
-                    <BaseInput v-model="form.name" type="text" placeholder="Masukkan nama..." :error="form.errors.name" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Username" :required="true" :error="form.errors.username">
-                    <BaseInput v-model="form.username" type="text" placeholder="nama_pengguna" :error="form.errors.username" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Alamat Email" :required="true" :error="form.errors.email">
-                    <BaseInput v-model="form.email" type="email" placeholder="email@contoh.com" :error="form.errors.email" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Kata Sandi" :required="!editTarget" :error="form.errors.password"
-                    :hint="editTarget ? 'Kosongkan jika tidak ingin mengubah kata sandi.' : undefined">
-                    <BaseInput v-model="form.password" type="password" placeholder="••••••••" :error="form.errors.password" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Role" :required="true" :error="form.errors.role">
-                    <BaseSelect v-model="form.role" :error="form.errors.role">
-                        <option value="">-- Pilih Role --</option>
-                        <option v-for="r in roleList" :key="r.id" :value="r.name">{{ r.name }}</option>
-                    </BaseSelect>
-                </FormField>
-            </div>
-            <div class="sm:col-span-2">
-                <FormActions :processing="form.processing" submit-label="Simpan Pengguna" @cancel="closeForm" />
+    <!-- Form Modal matching Foto 5 -->
+    <FormModal :show="showForm" :title="editTarget ? 'Edit Pengguna' : 'Manajemen Pengguna'" max-width="2xl" @close="closeForm">
+        <form @submit.prevent="submit" class="space-y-4">
+            <FormField label="Nama Lengkap" :required="true" :error="form.errors.name">
+                <BaseInput v-model="form.name" type="text" placeholder="" :error="form.errors.name" />
+            </FormField>
+
+            <FormField label="Username" :required="true" :error="form.errors.username">
+                <BaseInput v-model="form.username" type="text" placeholder="" :error="form.errors.username" />
+            </FormField>
+
+            <FormField label="Password" :required="!editTarget" :error="form.errors.password"
+                :hint="editTarget ? 'Kosongkan jika tidak ingin mengubah kata sandi.' : undefined">
+                <BaseInput v-model="form.password" type="password" placeholder="" :error="form.errors.password" />
+            </FormField>
+
+            <FormField label="Unit Kerja" :error="form.errors.auditee_pusat_id">
+                <BaseSelect v-model="form.auditee_pusat_id" :error="form.errors.auditee_pusat_id">
+                    <option value="">-- PILIH --</option>
+                    <option v-for="ap in auditeePusatList" :key="ap.id" :value="ap.id">{{ ap.nama }}</option>
+                </BaseSelect>
+            </FormField>
+
+            <FormField label="Satuan Kerja">
+                <BaseSelect disabled>
+                    <option value="">-- PILIH --</option>
+                </BaseSelect>
+            </FormField>
+
+            <FormField label="Group">
+                <BaseSelect disabled>
+                    <option value="">Admin</option>
+                </BaseSelect>
+            </FormField>
+
+            <FormField label="Keterangan">
+                <BaseTextarea v-model="form.keterangan" :rows="3" placeholder="" />
+            </FormField>
+
+            <FormField label="Status">
+                <div class="flex items-center gap-6 pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" :value="true" v-model="form.is_active" class="text-blue-600" />
+                        <span class="text-sm">Aktif</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" :value="false" v-model="form.is_active" class="text-blue-600" />
+                        <span class="text-sm">Tidak Aktif</span>
+                    </label>
+                </div>
+            </FormField>
+
+            <FormActions :processing="form.processing" submit-label="Simpan" @cancel="closeForm" />
+
+            <!-- Petunjuk in form matching Foto 5 -->
+            <div class="rounded-lg border border-blue-200 bg-blue-50/50 p-4 mt-4">
+                <h4 class="text-sm font-semibold text-blue-700 mb-2">Petunjuk</h4>
+                <ul class="list-disc list-inside text-xs text-blue-600 space-y-1">
+                    <li>Nama pengguna adalah nama yang dipakai untuk login, sedangkan nama asli adalah nama asli dari pengguna tersebut.</li>
+                </ul>
             </div>
         </form>
     </FormModal>

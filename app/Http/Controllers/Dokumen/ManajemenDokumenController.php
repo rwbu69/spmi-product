@@ -18,7 +18,7 @@ class ManajemenDokumenController extends Controller
 {
     public function index(Request $request): Response
     {
-        $data = ManajemenDokumen::with([
+        $query = ManajemenDokumen::with([
             'jenisDokumen.kategoriDokumen:id,nama_kategori',
             'jenisDokumen:id,nama_jenis,kategori_dokumen_id',
             'auditee:id,nama_auditee',
@@ -30,10 +30,26 @@ class ManajemenDokumenController extends Controller
                 'jenisDokumen',
                 fn ($q2) => $q2->where('kategori_dokumen_id', $request->kategori_id)
             ))
-            ->when($request->auditee_id, fn ($q) => $q->where('auditee_id', $request->auditee_id))
-            ->latest()
-            ->paginate(10)
-            ->withQueryString();
+            ->when($request->auditee_id, fn ($q) => $q->where('auditee_id', $request->auditee_id));
+
+        $user = auth()->user();
+        if ($user && $user->hasAnyRole(['Auditee', 'Unit Penunjang'])) {
+            $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                  ->orWhere(function ($sub) {
+                      $sub->whereNull('auditee_id')->whereNull('unit_penunjang_id');
+                  });
+                
+                if ($user->auditee_id) {
+                    $q->orWhere('auditee_id', $user->auditee_id);
+                }
+                if ($user->unit_penunjang_id) {
+                    $q->orWhere('unit_penunjang_id', $user->unit_penunjang_id);
+                }
+            });
+        }
+
+        $data = $query->latest()->paginate(10)->withQueryString();
 
         // Build auditee list for filter: regular auditees only
         $auditeeList = Auditee::orderBy('nama_auditee')->get(['id', 'nama_auditee']);
@@ -76,7 +92,7 @@ class ManajemenDokumenController extends Controller
     {
         $request->validate([
             'jenis_dokumen_id'   => ['required', 'exists:jenis_dokumen,id'],
-            'penerima_type'      => ['required', 'in:auditee,unit_penunjang'],
+            'penerima_type'      => ['required', 'in:auditee,unit_penunjang,semua'],
             'auditee_id'         => ['nullable', 'required_if:penerima_type,auditee', 'exists:auditee,id'],
             'unit_penunjang_id'  => ['nullable', 'required_if:penerima_type,unit_penunjang', 'exists:unit_penunjang,id'],
             'nama_dokumen'       => ['required', 'string', 'max:255'],

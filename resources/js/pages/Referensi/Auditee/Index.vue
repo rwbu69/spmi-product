@@ -16,8 +16,10 @@ interface Auditee {
     jenjang: string;
     akreditasi: string | null;
     alamat: string | null;
+    keterangan: string | null;
     sk_no: string | null;
     sk_tanggal: string | null;
+    sk_tanggal_selesai: string | null;
     sk_file_path: string | null;
     auditee_pusat: { id: number; nama: string };
 }
@@ -53,8 +55,10 @@ const editTarget = ref<Auditee | null>(null);
 const form = useForm({
     kode: '', nama_auditee: '', jenjang: '',
     auditee_pusat_id: '' as string | number,
-    alamat: '', akreditasi: '', sk_no: '', sk_tanggal: '',
+    alamat: '', akreditasi: '', sk_no: '',
+    sk_tanggal: '', sk_tanggal_selesai: '',
     sk_file: null as File | null,
+    keterangan: '',
 });
 
 const openCreate = () => { editTarget.value = null; form.reset(); form.clearErrors(); showForm.value = true; };
@@ -63,8 +67,12 @@ const openEdit = (item: Auditee) => {
     form.kode = item.kode; form.nama_auditee = item.nama_auditee;
     form.jenjang = item.jenjang; form.auditee_pusat_id = item.auditee_pusat.id;
     form.alamat = item.alamat ?? ''; form.akreditasi = item.akreditasi ?? '';
-    form.sk_no = item.sk_no ?? ''; form.sk_tanggal = item.sk_tanggal ?? '';
-    form.sk_file = null; form.clearErrors(); showForm.value = true;
+    form.sk_no = item.sk_no ?? '';
+    form.sk_tanggal = item.sk_tanggal ? item.sk_tanggal.substring(0, 10) : '';
+    form.sk_tanggal_selesai = item.sk_tanggal_selesai ? item.sk_tanggal_selesai.substring(0, 10) : '';
+    form.sk_file = null;
+    form.keterangan = item.keterangan ?? '';
+    form.clearErrors(); showForm.value = true;
 };
 const closeForm = () => { showForm.value = false; editTarget.value = null; form.reset(); form.clearErrors(); };
 const onFileChange = (e: Event) => { form.sk_file = (e.target as HTMLInputElement).files?.[0] ?? null; };
@@ -163,67 +171,78 @@ const akreditasiBadge = (ak: string | null) => {
         <Pagination :links="data.links" :total="data.total" />
     </div>
 
-    <FormModal :show="showForm" :title="editTarget ? 'Edit Auditee' : 'Tambah Auditee'" max-width="2xl" @close="closeForm">
-        <form @submit.prevent="submit" class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-                <FormField label="Kode" :required="true" :error="form.errors.kode">
-                    <BaseInput v-model="form.kode" type="text" placeholder="Contoh: S1-TEO" :error="form.errors.kode" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Jenjang" :required="true" :error="form.errors.jenjang">
-                    <BaseSelect v-model="form.jenjang" :error="form.errors.jenjang">
-                        <option value="">-- Pilih Jenjang --</option>
-                        <option v-for="j in jenjangOptions" :key="j" :value="j">{{ j }}</option>
-                    </BaseSelect>
-                </FormField>
-            </div>
-            <div class="sm:col-span-2">
-                <FormField label="Nama Auditee" :required="true" :error="form.errors.nama_auditee">
-                    <BaseInput v-model="form.nama_auditee" type="text" placeholder="Contoh: Sarjana Teologi" :error="form.errors.nama_auditee" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Auditee Pusat" :required="true" :error="form.errors.auditee_pusat_id">
-                    <BaseSelect v-model="form.auditee_pusat_id" :error="form.errors.auditee_pusat_id">
-                        <option value="">-- Pilih Auditee Pusat --</option>
-                        <option v-for="ap in auditeePusat" :key="ap.id" :value="ap.id">{{ ap.nama }}</option>
-                    </BaseSelect>
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Akreditasi" :error="form.errors.akreditasi">
-                    <BaseSelect v-model="form.akreditasi">
-                        <option value="">-- Pilih Akreditasi --</option>
-                        <option v-for="ak in akreditasiOptions" :key="ak" :value="ak">{{ ak }}</option>
-                    </BaseSelect>
-                </FormField>
-            </div>
-            <div class="sm:col-span-2">
-                <FormField label="Alamat">
-                    <BaseTextarea v-model="form.alamat" :rows="2" placeholder="Alamat lengkap..." />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Nomor SK" :error="form.errors.sk_no">
-                    <BaseInput v-model="form.sk_no" type="text" placeholder="No. SK..." :error="form.errors.sk_no" />
-                </FormField>
-            </div>
-            <div>
-                <FormField label="Tanggal SK" :error="form.errors.sk_tanggal">
-                    <BaseInput v-model="form.sk_tanggal" type="date" :error="form.errors.sk_tanggal" />
-                </FormField>
-            </div>
-            <div class="sm:col-span-2">
-                <FormField label="File SK (PDF, maks 2MB)"
-                    :hint="editTarget?.sk_file_path ? 'Kosongkan jika tidak ingin mengganti file.' : undefined">
-                    <input type="file" accept="application/pdf" @change="onFileChange"
-                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-blue-700" />
-                </FormField>
-            </div>
-            <div class="sm:col-span-2">
-                <FormActions :processing="form.processing" submit-label="Simpan" @cancel="closeForm" />
-            </div>
+    <!-- Form Modal matching the design (Foto 1) -->
+    <FormModal :show="showForm" :title="editTarget ? 'Edit Data' : 'Tambah Data'" max-width="2xl" @close="closeForm">
+        <form @submit.prevent="submit" class="space-y-4">
+            <!-- Auditee Pusat -->
+            <FormField label="Auditee Pusat" :error="form.errors.auditee_pusat_id">
+                <BaseSelect v-model="form.auditee_pusat_id" :error="form.errors.auditee_pusat_id">
+                    <option value="">-- SEMUA --</option>
+                    <option v-for="ap in auditeePusat" :key="ap.id" :value="ap.id">{{ ap.nama }}</option>
+                </BaseSelect>
+            </FormField>
+
+            <!-- Kode -->
+            <FormField label="Kode" :required="true" :error="form.errors.kode">
+                <BaseInput v-model="form.kode" type="text" placeholder="" :error="form.errors.kode" />
+            </FormField>
+
+            <!-- Nama Auditee -->
+            <FormField label="Nama Auditee" :required="true" :error="form.errors.nama_auditee">
+                <BaseInput v-model="form.nama_auditee" type="text" placeholder="" :error="form.errors.nama_auditee" />
+            </FormField>
+
+            <!-- Jenjang -->
+            <FormField label="Jenjang" :required="true" :error="form.errors.jenjang">
+                <BaseSelect v-model="form.jenjang" :error="form.errors.jenjang">
+                    <option value="">-- PILIH --</option>
+                    <option v-for="j in jenjangOptions" :key="j" :value="j">{{ j }}</option>
+                </BaseSelect>
+            </FormField>
+
+            <!-- Akreditasi -->
+            <FormField label="Akreditasi" :error="form.errors.akreditasi">
+                <BaseSelect v-model="form.akreditasi">
+                    <option value="">-- PILIH --</option>
+                    <option v-for="ak in akreditasiOptions" :key="ak" :value="ak">{{ ak }}</option>
+                </BaseSelect>
+            </FormField>
+
+            <!-- No SK Akreditasi -->
+            <FormField label="No SK Akreditasi" :error="form.errors.sk_no">
+                <BaseInput v-model="form.sk_no" type="text" placeholder="" :error="form.errors.sk_no" />
+            </FormField>
+
+            <!-- Tanggal Akreditasi (mulai - selesai) -->
+            <FormField label="Tanggal Akreditasi" :error="form.errors.sk_tanggal || form.errors.sk_tanggal_selesai">
+                <div class="flex items-center gap-3">
+                    <BaseInput v-model="form.sk_tanggal" type="date" class="flex-1" :error="form.errors.sk_tanggal" />
+                    <BaseInput v-model="form.sk_tanggal_selesai" type="date" class="flex-1" :error="form.errors.sk_tanggal_selesai" />
+                </div>
+            </FormField>
+
+            <!-- File Akreditasi -->
+            <FormField label="File Akreditasi"
+                :hint="editTarget?.sk_file_path ? 'Kosongkan jika tidak ingin mengganti file.' : undefined">
+                <input type="file" accept="application/pdf" @change="onFileChange"
+                    class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm file:mr-3 file:rounded file:border-0 file:bg-blue-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-blue-700" />
+                <p class="mt-1.5 text-xs text-red-500 italic">
+                    *) Format file harus berupa PDF dan ukuran file tidak boleh melebihi 2MB.
+                </p>
+            </FormField>
+
+            <!-- Alamat -->
+            <FormField label="Alamat">
+                <BaseTextarea v-model="form.alamat" :rows="3" placeholder="" />
+            </FormField>
+
+            <!-- Keterangan -->
+            <FormField label="Keterangan">
+                <BaseTextarea v-model="form.keterangan" :rows="3" placeholder="" />
+            </FormField>
+
+            <!-- Actions -->
+            <FormActions :processing="form.processing" submit-label="Simpan" @cancel="closeForm" />
         </form>
     </FormModal>
 

@@ -70,7 +70,7 @@ const openEdit = (item: DraftRtm) => {
     form.pengaturan_periode_id = item.pengaturan_periode.id.toString();
     form.auditee_id = item.auditee.id.toString();
     form.nama_dokumen = item.nama_dokumen;
-    form.tanggal_dibuat = item.tanggal_dibuat;
+    form.tanggal_dibuat = item.tanggal_dibuat ? item.tanggal_dibuat.substring(0, 10) : '';
     form.status = item.status;
     form.file_path = null;
     showForm.value = true;

@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Edit2, Plus, Trash2, Calendar, Clock } from 'lucide-vue-next';
 import { ref } from 'vue';
@@ -47,6 +47,15 @@ const form = useForm({
     status: 'Tidak Aktif',
 });
 
+/**
+ * Normalize a date string to YYYY-MM-DD for HTML date input.
+ * Handles ISO 8601, "YYYY-MM-DDTHH:mm:ss" or plain "YYYY-MM-DD".
+ */
+const toDateStr = (v: string | null | undefined): string => {
+    if (!v) return '';
+    return v.substring(0, 10); // works for ISO and standard formats
+};
+
 const openCreate = () => {
     editTarget.value = null;
     form.reset();
@@ -57,12 +66,12 @@ const openEdit = (item: PengaturanPeriode) => {
     editTarget.value = item;
     form.tahun_periode_id = item.tahun_periode.id.toString();
     form.lembaga_akreditasi_id = item.lembaga_akreditasi.id.toString();
-    form.mulai_evaluasi_diri = item.mulai_evaluasi_diri ?? '';
-    form.akhir_evaluasi_diri = item.akhir_evaluasi_diri ?? '';
-    form.mulai_desk_eval = item.mulai_desk_eval ?? '';
-    form.akhir_desk_eval = item.akhir_desk_eval ?? '';
-    form.mulai_visitasi = item.mulai_visitasi ?? '';
-    form.akhir_visitasi = item.akhir_visitasi ?? '';
+    form.mulai_evaluasi_diri = toDateStr(item.mulai_evaluasi_diri);
+    form.akhir_evaluasi_diri = toDateStr(item.akhir_evaluasi_diri);
+    form.mulai_desk_eval = toDateStr(item.mulai_desk_eval);
+    form.akhir_desk_eval = toDateStr(item.akhir_desk_eval);
+    form.mulai_visitasi = toDateStr(item.mulai_visitasi);
+    form.akhir_visitasi = toDateStr(item.akhir_visitasi);
     form.status = item.status;
     showForm.value = true;
 };

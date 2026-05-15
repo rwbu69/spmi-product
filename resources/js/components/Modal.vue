@@ -40,11 +40,10 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
         >
             <div
                 v-if="show"
-                class="fixed inset-0 z-50 flex items-center justify-center p-4"
-                @click.self="emit('close')"
+                class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:py-8"
             >
                 <!-- Backdrop -->
-                <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')" />
 
                 <!-- Modal Panel -->
                 <Transition
@@ -75,7 +74,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
                         </div>
 
                         <!-- Body -->
-                        <div class="px-6 py-5">
+                        <div class="max-h-[calc(100vh-10rem)] overflow-y-auto px-6 py-5">
                             <slot />
                         </div>
                     </div>
