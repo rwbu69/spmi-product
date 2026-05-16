@@ -16,7 +16,13 @@ class LaporanAmiController extends Controller
 {
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', LaporanAmi::class);
+
         $query = LaporanAmi::with(['auditee', 'pengaturanPeriode.tahunPeriode', 'pengaturanPeriode.lembagaAkreditasi']);
+
+        if ($request->user()) {
+            $query->visibleTo($request->user());
+        }
 
         if ($request->search) {
             $query->whereHas('auditee', function($q) use ($request) {
@@ -32,10 +38,8 @@ class LaporanAmiController extends Controller
 
         // For Auditee role: pass the current auditee record for the header info
         $currentAuditee = null;
-        if (auth()->user()?->hasAnyRole(['Auditee', 'Unit Penunjang'])) {
-            // Try to resolve auditee by user name match
-            $currentAuditee = Auditee::where('nama_auditee', auth()->user()->name)->first(['id', 'nama_auditee'])
-                ?? Auditee::first(['id', 'nama_auditee']);
+        if ($request->user()?->hasAnyRole(['Auditee', 'Unit Penunjang']) && $request->user()?->auditee_id) {
+            $currentAuditee = Auditee::where('id', $request->user()->auditee_id)->first(['id', 'nama_auditee']);
         }
 
         return Inertia::render('Ami/LaporanAmi/Index', [
@@ -52,6 +56,8 @@ class LaporanAmiController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', LaporanAmi::class);
+
         $request->validate([
             'pengaturan_periode_id' => 'required|exists:pengaturan_periode,id',
             'auditee_id' => 'required|exists:auditee,id',
@@ -75,6 +81,8 @@ class LaporanAmiController extends Controller
 
     public function update(Request $request, LaporanAmi $laporanAmi): RedirectResponse
     {
+        $this->authorize('update', $laporanAmi);
+
         $request->validate([
             'file_laporan' => 'nullable|file|mimes:pdf|max:10240',
             'tanggal_laporan' => 'required|date',
@@ -95,6 +103,8 @@ class LaporanAmiController extends Controller
 
     public function destroy(LaporanAmi $laporanAmi): RedirectResponse
     {
+        $this->authorize('delete', $laporanAmi);
+
         Storage::disk('public')->delete($laporanAmi->file_laporan);
         $laporanAmi->delete();
 
@@ -103,12 +113,19 @@ class LaporanAmiController extends Controller
 
     public function download(LaporanAmi $laporanAmi)
     {
+        $this->authorize('view', $laporanAmi);
+
         $fullPath = Storage::disk('public')->path($laporanAmi->file_laporan);
 
         if (! file_exists($fullPath)) {
             abort(404, 'File tidak ditemukan.');
         }
 
-        return response()->file($fullPath);
+        $filename = 'Laporan_AMI_' . preg_replace('/[^\w\-.]/', '_', $laporanAmi->auditee->nama_auditee) . '_' . $laporanAmi->pengaturanPeriode->tahunPeriode->tahun . '.pdf';
+
+        return response()->file($fullPath, [
+            'Content-Type'        => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"',
+        ]);
     }
 }

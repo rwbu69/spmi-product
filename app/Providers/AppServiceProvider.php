@@ -2,11 +2,19 @@
 
 namespace App\Providers;
 
+use App\Listeners\SendMenuNotification;
+use App\Models\LaporanAmi;
+use App\Models\ManajemenDokumen;
+use App\Policies\LaporanAmiPolicy;
+use App\Policies\ManajemenDokumenPolicy;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
+use Spatie\Activitylog\Events\ActivityLogged;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -24,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->configureDefaults();
+        $this->registerPolicies();
+        $this->registerActivityNotifications();
     }
 
     /**
@@ -46,5 +56,16 @@ class AppServiceProvider extends ServiceProvider
                 ->uncompromised()
             : null,
         );
+    }
+
+    protected function registerPolicies(): void
+    {
+        Gate::policy(ManajemenDokumen::class, ManajemenDokumenPolicy::class);
+        Gate::policy(LaporanAmi::class, LaporanAmiPolicy::class);
+    }
+
+    protected function registerActivityNotifications(): void
+    {
+        Event::listen(ActivityLogged::class, [SendMenuNotification::class, 'handle']);
     }
 }

@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DaftarKesesuaian extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'daftar_kesesuaian';
 
     protected $fillable = [

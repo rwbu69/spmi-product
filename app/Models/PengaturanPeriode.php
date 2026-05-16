@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class PengaturanPeriode extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'pengaturan_periode';
 
     protected $fillable = [

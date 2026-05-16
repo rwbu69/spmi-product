@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TahunPeriode extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'tahun_periode';
 
     protected $fillable = ['tahun', 'status'];

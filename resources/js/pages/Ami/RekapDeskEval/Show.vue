@@ -9,7 +9,7 @@ interface DeskEvaluation {
     catatan: string | null;
     indikator: {
         id: number;
-        nama_indikator: string;
+        deskripsi: string;
         standar_mutu: {
             nama_standar: string;
         };
@@ -75,7 +75,7 @@ const getScoreColor = (score: number) => {
                     <tr v-for="item in deskEvaluations" :key="item.id" class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                         <td class="px-4 py-4">
                             <div class="text-xs font-bold text-gray-400 mb-1">{{ item.indikator.standar_mutu.nama_standar }}</div>
-                            <div class="font-medium text-gray-900 dark:text-gray-100">{{ item.indikator.nama_indikator }}</div>
+                            <div class="font-medium text-gray-900 dark:text-gray-100">{{ item.indikator.deskripsi }}</div>
                         </td>
                         <td class="px-4 py-4 text-center">
                             <span :class="getScoreColor(item.nilai)" class="inline-flex items-center justify-center w-12 h-8 rounded-lg font-bold border">

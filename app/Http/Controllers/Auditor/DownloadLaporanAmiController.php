@@ -15,7 +15,13 @@ class DownloadLaporanAmiController extends Controller
 {
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', LaporanAmi::class);
+
         $query = LaporanAmi::with(['auditee', 'pengaturanPeriode.tahunPeriode', 'pengaturanPeriode.lembagaAkreditasi']);
+
+        if ($request->user()) {
+            $query->visibleTo($request->user());
+        }
 
         if ($request->search) {
             $query->whereHas('auditee', fn ($q) => $q->where('nama_auditee', 'like', "%{$request->search}%"));

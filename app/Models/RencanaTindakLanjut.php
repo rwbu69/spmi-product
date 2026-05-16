@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class RencanaTindakLanjut extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'rencana_tindak_lanjut';
 
     protected $fillable = [

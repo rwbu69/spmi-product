@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UploadLaporanRtm extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'upload_laporan_rtm';
 
     protected $fillable = [

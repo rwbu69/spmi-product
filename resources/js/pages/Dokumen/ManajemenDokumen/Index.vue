@@ -118,15 +118,15 @@ onUnmounted(() => document.removeEventListener('click', closeDropdownOnOutsideCl
 const showForm   = ref(false);
 const editTarget = ref<ManajemenDokumen | null>(null);
 
-const openCreate = () => { 
-    editTarget.value = null; 
-    form.reset(); 
-    selectedKategori.value = ''; 
+const openCreate = () => {
+    editTarget.value = null;
+    form.reset();
+    selectedKategori.value = '';
     selectedAuditeeLabel.value = '-- PILIH SEMUA --';
     form.penerima_type = 'semua';
     form.auditee_id = '';
     form.unit_penunjang_id = '';
-    showForm.value = true; 
+    showForm.value = true;
 };
 
 const openEdit   = (item: ManajemenDokumen) => {
@@ -136,7 +136,7 @@ const openEdit   = (item: ManajemenDokumen) => {
     form.tahun = item.tahun ?? new Date().getFullYear();
     form.file = null;
     selectedKategori.value = item.jenis_dokumen.kategori_dokumen_id?.toString() ?? '';
-    
+
     if (item.auditee) {
         form.penerima_type = 'auditee';
         form.auditee_id = item.auditee.id;
@@ -149,7 +149,7 @@ const openEdit   = (item: ManajemenDokumen) => {
         form.penerima_type = 'semua';
         selectedAuditeeLabel.value = '-- PILIH SEMUA --';
     }
-    
+
     showForm.value = true;
 };
 
@@ -205,7 +205,7 @@ const allUsers = computed(() => {
         </div>
 
         <div class="flex items-center justify-between">
-            <button type="button" class="inline-flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" @click="openCreate">
+            <button v-if="isAdmin" type="button" class="inline-flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" @click="openCreate">
                 <Plus class="size-4" /> Tambah
             </button>
             <div class="flex items-center gap-4">
@@ -280,7 +280,7 @@ const allUsers = computed(() => {
                     <option v-for="k in kategoriList" :key="k.id" :value="k.id">{{ k.nama_kategori }}</option>
                 </select>
             </div>
-            
+
             <div class="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right">Jenis Dokumen</label>
                 <select v-model="form.jenis_dokumen_id" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
@@ -288,31 +288,31 @@ const allUsers = computed(() => {
                     <option v-for="j in filteredJenisList" :key="j.id" :value="j.id">{{ j.nama_jenis }}</option>
                 </select>
             </div>
-            
+
             <div class="grid grid-cols-[140px_1fr] items-start gap-x-4 gap-y-1 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right mt-2">Auditee</label>
                 <div class="relative w-full" ref="auditeeDropdownRef">
-                    <div 
+                    <div
                         class="flex items-center justify-between w-full rounded border border-gray-300 px-3 py-2 text-sm cursor-pointer bg-white"
                         @click="showAuditeeDropdown = !showAuditeeDropdown"
                     >
                         <span class="truncate">{{ selectedAuditeeLabel }}</span>
                         <ChevronDown class="size-4 text-gray-400" />
                     </div>
-                    
+
                     <div v-if="showAuditeeDropdown" class="absolute z-50 mt-1 w-full rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
                         <div class="p-2 border-b">
-                            <input 
-                                v-model="auditeeSearch" 
-                                type="text" 
-                                class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none" 
-                                placeholder="Cari auditee..." 
-                                @click.stop 
+                            <input
+                                v-model="auditeeSearch"
+                                type="text"
+                                class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                                placeholder="Cari auditee..."
+                                @click.stop
                             />
                         </div>
                         <ul class="max-h-60 overflow-auto py-1 text-sm">
-                            <li 
-                                v-for="opt in filteredAuditeeOptions" 
+                            <li
+                                v-for="opt in filteredAuditeeOptions"
                                 :key="opt.value"
                                 class="px-3 py-2 hover:bg-blue-50 cursor-pointer flex items-center justify-between"
                                 :class="selectedAuditeeLabel === opt.label ? 'bg-blue-50 text-blue-600' : 'text-gray-700'"
@@ -329,7 +329,7 @@ const allUsers = computed(() => {
                     <p class="mt-1 text-[11px] text-gray-500">*Pilih SEMUA untuk dokumen yang diploting ke semua Auditee</p>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right">Nama Dokumen</label>
                 <div class="relative">
@@ -337,7 +337,7 @@ const allUsers = computed(() => {
                     <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 text-sm">*</span>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right">Tahun</label>
                 <div class="relative w-32">
@@ -345,7 +345,7 @@ const allUsers = computed(() => {
                     <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 text-sm">*</span>
                 </div>
             </div>
-            
+
             <div class="grid grid-cols-[140px_1fr] items-start gap-x-4 gap-y-1 py-3">
                 <label class="text-sm font-medium text-gray-600 text-right mt-1.5">File</label>
                 <div class="relative">
@@ -364,7 +364,7 @@ const allUsers = computed(() => {
                     <p v-if="editTarget" class="text-[10px] text-gray-400 mt-0.5 italic">Kosongkan jika tidak ingin mengganti file.</p>
                 </div>
             </div>
-            
+
             <div class="flex justify-end gap-2 pt-6 pb-2 border-t mt-2">
                 <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1" :disabled="form.processing">Simpan</button>
                 <button type="button" class="px-5 py-2 text-sm font-medium text-white bg-red-500 rounded hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1" @click="showForm = false">Batal</button>

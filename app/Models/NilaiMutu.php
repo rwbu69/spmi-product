@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NilaiMutu extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'nilai_mutu';
 
     protected $fillable = ['auditee_id', 'pengaturan_periode_id', 'lembaga_akreditasi_id', 'nilai', 'keterangan'];

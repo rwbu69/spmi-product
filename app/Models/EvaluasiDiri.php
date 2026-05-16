@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EvaluasiDiri extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'evaluasi_diri';
 
     protected $fillable = ['auditee_id', 'pengaturan_periode_id', 'nilai_evaluasi', 'status'];

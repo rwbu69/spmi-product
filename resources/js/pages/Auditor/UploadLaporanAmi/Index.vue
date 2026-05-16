@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { Plus, Trash2, Search, FileBadge, Download } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -77,7 +77,7 @@ const confirmDelete = () => {
     });
 };
 
-const getDownloadUrl = (path: string) => `/storage/${path}`;
+const getDownloadUrl = (item: LaporanAmi) => `/ami/laporan-ami/${item.id}/download`;
 </script>
 
 <template>
@@ -154,7 +154,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <td class="px-4 py-3 text-gray-500">{{ item.pengaturan_periode.tahun_periode.tahun }}</td>
                         <td class="px-4 py-3 text-center">
                             <div class="inline-flex items-center gap-1">
-                                <a :href="getDownloadUrl(item.file_laporan)" target="_blank" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition">
+                                <a :href="getDownloadUrl(item)" target="_blank" class="p-1.5 rounded-md text-blue-600 hover:bg-blue-50 transition">
                                     <Download class="size-4" />
                                 </a>
                                 <button type="button" class="p-1.5 rounded-md text-red-500 hover:bg-red-50 transition" @click="openDelete(item)">

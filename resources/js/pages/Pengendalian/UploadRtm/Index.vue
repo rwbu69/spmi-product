@@ -73,7 +73,7 @@ const confirmDelete = () => {
     });
 };
 
-const getDownloadUrl = (path: string) => `/storage/${path}`;
+const getDownloadUrl = (item: UploadRtm) => `/pengendalian/upload-rtm/${item.id}/download`;
 </script>
 
 <template>
@@ -120,7 +120,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                         <CheckCircle2 class="size-3 text-green-500" /> {{ item.status_download }}
                     </div>
                     <div class="flex items-center gap-2">
-                        <a :href="getDownloadUrl(item.file_path)" target="_blank" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50" title="Unduh">
+                        <a :href="getDownloadUrl(item)" target="_blank" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50" title="Unduh">
                             <Download class="size-4" />
                         </a>
                         <button type="button" class="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500" @click="openDelete(item)">

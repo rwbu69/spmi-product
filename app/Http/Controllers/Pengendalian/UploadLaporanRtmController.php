@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UploadLaporanRtmController extends Controller
 {
@@ -64,5 +65,21 @@ class UploadLaporanRtmController extends Controller
         Storage::disk('public')->delete($uploadRtm->file_path);
         $uploadRtm->delete();
         return back()->with('success', 'Laporan RTM berhasil dihapus.');
+    }
+
+    public function download(UploadLaporanRtm $uploadRtm): BinaryFileResponse
+    {
+        if (!$uploadRtm->file_path || !Storage::disk('public')->exists($uploadRtm->file_path)) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        $path = Storage::disk('public')->path($uploadRtm->file_path);
+        $ext = pathinfo($path, PATHINFO_EXTENSION);
+        $filename = "Laporan_RTM_{$uploadRtm->auditee->nama_auditee}_{$uploadRtm->tahunPeriode->tahun}.{$ext}";
+
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
     }
 }
