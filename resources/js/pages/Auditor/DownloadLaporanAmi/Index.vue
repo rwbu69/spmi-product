@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { Head, router } from '@inertiajs/vue3';
 import { Search, Download, FileBadge, Calendar } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -40,7 +40,7 @@ watch([search, periode_id], () => {
     }, 400);
 });
 
-const getDownloadUrl = (path: string) => `/storage/${path}`;
+const getDownloadUrl = (item: LaporanAmi) => `/ami/laporan-ami/${item.id}/download`;
 const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
 </script>
 
@@ -100,14 +100,14 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day:
                         <td class="px-4 py-3 text-center">
                             <div class="inline-flex rounded-lg overflow-hidden border border-blue-600">
                                 <a
-                                    :href="getDownloadUrl(item.file_laporan)"
+                                    :href="getDownloadUrl(item)"
                                     target="_blank"
                                     class="inline-flex items-center gap-1.5 bg-blue-600 text-white px-3 py-1.5 text-xs font-medium hover:bg-blue-700 transition"
                                 >
                                     {{ item.auditee.nama_auditee }}
                                 </a>
                                 <a
-                                    :href="getDownloadUrl(item.file_laporan)"
+                                    :href="getDownloadUrl(item)"
                                     target="_blank"
                                     class="inline-flex items-center px-2 py-1.5 bg-blue-500 text-white hover:bg-blue-600 transition border-l border-blue-700"
                                 >

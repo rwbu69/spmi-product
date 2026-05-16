@@ -18,6 +18,9 @@ class ManajemenDokumenController extends Controller
 {
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', ManajemenDokumen::class);
+
+        $user = $request->user();
         $query = ManajemenDokumen::with([
             'jenisDokumen.kategoriDokumen:id,nama_kategori',
             'jenisDokumen:id,nama_jenis,kategori_dokumen_id',
@@ -32,21 +35,8 @@ class ManajemenDokumenController extends Controller
             ))
             ->when($request->auditee_id, fn ($q) => $q->where('auditee_id', $request->auditee_id));
 
-        $user = auth()->user();
-        if ($user && $user->hasAnyRole(['Auditee', 'Unit Penunjang'])) {
-            $query->where(function ($q) use ($user) {
-                $q->where('user_id', $user->id)
-                  ->orWhere(function ($sub) {
-                      $sub->whereNull('auditee_id')->whereNull('unit_penunjang_id');
-                  });
-                
-                if ($user->auditee_id) {
-                    $q->orWhere('auditee_id', $user->auditee_id);
-                }
-                if ($user->unit_penunjang_id) {
-                    $q->orWhere('unit_penunjang_id', $user->unit_penunjang_id);
-                }
-            });
+        if ($user) {
+            $query->visibleTo($user);
         }
 
         $data = $query->latest()->paginate(10)->withQueryString();
@@ -90,6 +80,8 @@ class ManajemenDokumenController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', ManajemenDokumen::class);
+
         $request->validate([
             'jenis_dokumen_id'   => ['required', 'exists:jenis_dokumen,id'],
             'penerima_type'      => ['required', 'in:auditee,unit_penunjang,semua'],
@@ -123,6 +115,8 @@ class ManajemenDokumenController extends Controller
 
     public function update(Request $request, ManajemenDokumen $manajemen): RedirectResponse
     {
+        $this->authorize('update', $manajemen);
+
         $request->validate([
             'jenis_dokumen_id'  => ['required', 'exists:jenis_dokumen,id'],
             'penerima_type'     => ['required', 'in:auditee,unit_penunjang'],
@@ -153,6 +147,8 @@ class ManajemenDokumenController extends Controller
 
     public function destroy(ManajemenDokumen $manajemen): RedirectResponse
     {
+        $this->authorize('delete', $manajemen);
+
         $manajemen->delete();
 
         return back()->with('success', 'Dokumen berhasil dihapus.');
@@ -160,6 +156,8 @@ class ManajemenDokumenController extends Controller
 
     public function download(ManajemenDokumen $manajemen)
     {
+        $this->authorize('view', $manajemen);
+
         $path = $manajemen->file_path;
 
         if (! Storage::disk('local')->exists($path)) {

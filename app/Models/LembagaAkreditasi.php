@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LembagaAkreditasi extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'lembaga_akreditasi';
 
     protected $fillable = ['nama_lembaga', 'keterangan'];

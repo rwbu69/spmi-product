@@ -12,6 +12,7 @@ use App\Http\Controllers\Auditor\DownloadLaporanAmiController;
 use App\Http\Controllers\Auditor\UploadLaporanAmiController;
 use App\Http\Controllers\Auditor\RekapTemuanAuditorController;
 use App\Http\Controllers\Auditor\RekapKesesuaianAuditorController;
+use App\Http\Controllers\Admin\SystemNotificationController;
 use App\Http\Controllers\Dokumen\JenisDokumenController;
 use App\Http\Controllers\Dokumen\KategoriDokumenController;
 use App\Http\Controllers\Dokumen\ManajemenDokumenController;
@@ -32,6 +33,7 @@ use App\Http\Controllers\Referensi\TahunPeriodeController;
 use App\Http\Controllers\Referensi\UnitPenunjangController;
 use App\Http\Controllers\Pengaturan\PenggunaPortalController;
 use App\Http\Controllers\Pengaturan\PenggunaBackofficeController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\BerandaController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,7 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // ── Evaluasi AMI (Admin + Fakultas + Auditee + Unit Penunjang) ───────────────────────
-    Route::prefix('ami')->name('ami.view.')->middleware(['role:Admin|Fakultas|Auditee|Unit Penunjang'])->group(function () {
+    Route::prefix('ami')->name('ami.view.')->middleware(['role:Admin|Auditor|Fakultas|Auditee|Unit Penunjang'])->group(function () {
         Route::get('rekap-desk-eval', [RekapDeskEvalController::class, 'index'])->name('rekap-desk-eval.index');
         Route::get('rekap-desk-eval/standar/{lembagaId}', [RekapDeskEvalController::class, 'standarMutu'])->name('rekap-desk-eval.standar');
         Route::get('rekap-desk-eval/standar/{lembagaId}/detail/{standarId}', [RekapDeskEvalController::class, 'standarDetail'])->name('rekap-desk-eval.standar-detail');
@@ -106,7 +108,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('pengendalian')->name('pengendalian.')->middleware(['role:Admin|Auditor|Auditee|Fakultas|Unit Penunjang'])->group(function () {
         Route::resource('daftar-temuan', DaftarTemuanController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::get('daftar-temuan/export', [DaftarTemuanController::class, 'export'])->name('daftar-temuan.export');
+        Route::get('draft-rtm/{draft_rtm}/download', [DraftRtmController::class, 'download'])->name('draft-rtm.download');
         Route::resource('draft-rtm', DraftRtmController::class)->only(['index', 'store', 'update', 'destroy']);
+        
+        Route::get('upload-rtm/{upload_rtm}/download', [UploadLaporanRtmController::class, 'download'])->name('upload-rtm.download');
         Route::resource('upload-rtm', UploadLaporanRtmController::class)->only(['index', 'store', 'destroy']);
     });
 
@@ -125,4 +130,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->parameters(['pengguna-backoffice' => 'user'])
             ->except(['create', 'edit', 'show']);
     });
+
+    // ── Admin System Notifications ─────────────────────────
+    Route::prefix('admin')->name('admin.')->middleware(['role:Admin'])->group(function () {
+        Route::get('log-sistem', [SystemNotificationController::class, 'index'])->name('log-sistem.index');
+    });
+
+    // ── Notifications Read State ───────────────────────────
+    Route::post('notifications/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
 });

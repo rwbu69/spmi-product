@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\LogsMenuActivity;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class KategoriTemuan extends Model
 {
+    use LogsMenuActivity;
+
     protected $table = 'kategori_temuan';
 
     protected $fillable = ['nama_kategori', 'jenis_temuan_id'];

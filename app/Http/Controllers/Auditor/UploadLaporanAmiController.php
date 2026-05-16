@@ -16,6 +16,8 @@ class UploadLaporanAmiController extends Controller
 {
     public function index(Request $request): Response
     {
+        $this->authorize('viewAny', LaporanAmi::class);
+
         $query = LaporanAmi::with(['auditee', 'pengaturanPeriode.tahunPeriode', 'pengaturanPeriode.lembagaAkreditasi']);
 
         if ($request->auditee_id) {
@@ -41,6 +43,8 @@ class UploadLaporanAmiController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $this->authorize('create', LaporanAmi::class);
+
         $request->validate([
             'pengaturan_periode_id' => 'required|exists:pengaturan_periode,id',
             'auditee_id'            => 'required|exists:auditee,id',
@@ -64,6 +68,8 @@ class UploadLaporanAmiController extends Controller
 
     public function destroy(LaporanAmi $laporanAmi): RedirectResponse
     {
+        $this->authorize('delete', $laporanAmi);
+
         Storage::disk('public')->delete($laporanAmi->file_laporan);
         $laporanAmi->delete();
 

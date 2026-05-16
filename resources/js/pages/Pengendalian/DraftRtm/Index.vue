@@ -100,7 +100,7 @@ const confirmDelete = () => {
     });
 };
 
-const getDownloadUrl = (path: string) => `/storage/${path}`;
+const getDownloadUrl = (item: DraftRtm) => `/pengendalian/draft-rtm/${item.id}/download`;
 </script>
 
 <template>
@@ -151,7 +151,7 @@ const getDownloadUrl = (path: string) => `/storage/${path}`;
                 </div>
 
                 <div class="mt-6 pt-4 border-t dark:border-gray-800 flex justify-end gap-2">
-                    <a v-if="item.file_path" :href="getDownloadUrl(item.file_path)" target="_blank" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100" title="Unduh">
+                    <a v-if="item.file_path" :href="getDownloadUrl(item)" target="_blank" class="p-2 rounded-lg text-gray-400 hover:bg-gray-100" title="Unduh">
                         <Download class="size-4" />
                     </a>
                     <button type="button" class="p-2 rounded-lg text-gray-400 hover:bg-blue-50 hover:text-blue-600" @click="openEdit(item)">

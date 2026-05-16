@@ -173,6 +173,7 @@ const adminNavGroups: NavGroup[] = [
         children: [
             { title: 'Pengguna Backoffice', href: '/pengaturan/pengguna-backoffice' },
             { title: 'Pengguna Portal',     href: '/pengaturan/pengguna-portal' },
+            { title: 'Pemberitahuan Update', href: '/admin/log-sistem' },
         ],
     },
 ];
