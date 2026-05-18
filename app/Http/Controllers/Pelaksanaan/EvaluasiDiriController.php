@@ -16,7 +16,7 @@ class EvaluasiDiriController extends Controller
 {
     public function index(Request $request): Response
     {
-        $isAuditee = auth()->user()?->hasAnyRole(['Auditee', 'Unit Penunjang']);
+        $isAuditee = auth()->user()?->hasAnyRole(['Auditee', 'Unit Penunjang', 'Fakultas']);
 
         // Get active TahunPeriode
         $aktivPeriode = TahunPeriode::where('status', 'Aktif')->first();
@@ -91,6 +91,10 @@ class EvaluasiDiriController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        if (!auth()->user()->hasRole('Admin')) {
+            abort(403, 'Aksi ini tidak diizinkan.');
+        }
+
         $validated = $request->validate([
             'pengaturan_periode_id' => 'required|exists:pengaturan_periode,id',
             'auditee_id' => 'required|exists:auditee,id',
@@ -107,6 +111,10 @@ class EvaluasiDiriController extends Controller
 
     public function destroy(EvaluasiDiri $evaluasiDiri): RedirectResponse
     {
+        if (!auth()->user()->hasRole('Admin')) {
+            abort(403, 'Aksi ini tidak diizinkan.');
+        }
+
         $evaluasiDiri->delete();
         return back()->with('success', 'Evaluasi diri berhasil dihapus.');
     }

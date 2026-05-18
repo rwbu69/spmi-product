@@ -75,49 +75,40 @@ class DaftarTemuanController extends Controller
         ]);
     }
 
-    public function export(Request $request): HttpResponse
+    public function export(Request $request)
     {
         $items = $this->buildQuery($request)->latest()->get();
 
-        $filename = 'daftar_temuan_' . now()->format('Ymd_His') . '.csv';
+        $data = [];
+        foreach ($items as $i => $item) {
+            $standar = $item->temuan?->deskEvaluation?->indikator?->standarMutu;
+            $deskEval = $item->temuan?->deskEvaluation;
+            $rtl = $item->rencanaTindakLanjut->pluck('uraian_rtm')->join('; ');
 
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
+            $data[] = [
+                $i + 1,
+                $standar ? "[{$standar->kode}] {$standar->nama_standar}" : '-',
+                $item->temuan?->deskripsi ?? '-',
+                $deskEval?->nilai ?? '-',
+                $item->uraian_temuan,
+                $rtl ?: '-',
+                $item->status,
+                $item->auditee->nama_auditee ?? '-',
+                $item->pengaturanPeriode->tahunPeriode->tahun ?? '-',
+                $item->pengaturanPeriode->lembagaAkreditasi->nama_lembaga ?? '-',
+            ];
+        }
 
-        $callback = function () use ($items) {
-            $handle = fopen('php://output', 'w');
-            fputs($handle, "\xEF\xBB\xBF"); // UTF-8 BOM
-
-            fputcsv($handle, ['No', 'Standar Mutu', 'Deskripsi', 'Nilai Mutu', 'Daftar Temuan', 'Tindak Lanjut', 'Status', 'Auditee', 'Periode', 'Lembaga']);
-
-            foreach ($items as $i => $item) {
-                $standar = $item->temuan?->deskEvaluation?->indikator?->standarMutu;
-                $deskEval = $item->temuan?->deskEvaluation;
-                $rtl = $item->rencanaTindakLanjut->pluck('uraian_rtm')->join('; ');
-
-                fputcsv($handle, [
-                    $i + 1,
-                    $standar ? "[{$standar->kode}] {$standar->nama_standar}" : '-',
-                    $item->temuan?->deskripsi ?? '-',
-                    $deskEval?->nilai ?? '-',
-                    $item->uraian_temuan,
-                    $rtl ?: '-',
-                    $item->status,
-                    $item->auditee->nama_auditee ?? '-',
-                    $item->pengaturanPeriode->tahunPeriode->tahun ?? '-',
-                    $item->pengaturanPeriode->lembagaAkreditasi->nama_lembaga ?? '-',
-                ]);
-            }
-            fclose($handle);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        $filename = 'daftar_temuan_' . now()->format('Ymd_His') . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\DaftarTemuanExport($data), $filename);
     }
 
     public function store(Request $request): RedirectResponse
     {
+        if (!auth()->user()->hasRole('Admin')) {
+            abort(403, 'Aksi ini tidak diizinkan.');
+        }
+
         $validated = $request->validate([
             'auditee_id'            => 'required|exists:auditee,id',
             'pengaturan_periode_id'  => 'required|exists:pengaturan_periode,id',
@@ -133,6 +124,10 @@ class DaftarTemuanController extends Controller
 
     public function update(Request $request, DaftarTemuanPp $daftarTemuan): RedirectResponse
     {
+        if (!auth()->user()->hasRole('Admin')) {
+            abort(403, 'Aksi ini tidak diizinkan.');
+        }
+
         $validated = $request->validate([
             'uraian_temuan' => 'required|string',
             'jenis'         => 'required|string',
@@ -146,6 +141,10 @@ class DaftarTemuanController extends Controller
 
     public function destroy(DaftarTemuanPp $daftarTemuan): RedirectResponse
     {
+        if (!auth()->user()->hasRole('Admin')) {
+            abort(403, 'Aksi ini tidak diizinkan.');
+        }
+
         $daftarTemuan->delete();
         return back()->with('success', 'Daftar temuan berhasil dihapus.');
     }

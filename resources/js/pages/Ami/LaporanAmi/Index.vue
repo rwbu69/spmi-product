@@ -86,6 +86,41 @@ const confirmDelete = () => {
 
 const getDownloadUrl = (item: LaporanAmi) => `/ami/laporan-ami/${item.id}/download`;
 const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+
+const handleDownload = async (url: string, defaultFilename: string) => {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            if (response.status === 404) throw new Error('Dokumen tidak ditemukan.');
+            throw new Error('Terjadi kesalahan pada server saat mengunduh dokumen.');
+        }
+        
+        let filename = defaultFilename;
+        const disposition = response.headers.get('Content-Disposition');
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+            if (matches != null && matches[1]) { 
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        
+        window.open(blobUrl, '_blank');
+        
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    } catch (error: any) {
+        alert(error.message);
+    }
+};
 </script>
 
 <template>
@@ -149,10 +184,10 @@ const formatDate = (d: string) => new Date(d).toLocaleDateString('id-ID', { day:
                     </BaseBadge>
                 </td>
                 <td class="px-4 py-3">
-                    <a :href="getDownloadUrl(item)" target="_blank"
+                    <button type="button" @click.prevent="handleDownload(getDownloadUrl(item), 'Laporan_AMI.pdf')" 
                         class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md bg-gray-50 text-gray-600 text-xs font-medium hover:bg-gray-100 transition">
                         <Download class="size-3.5" /> Unduh PDF
-                    </a>
+                    </button>
                 </td>
                 <td v-if="isAdmin" class="px-4 py-3">
                     <div class="flex items-center justify-center gap-1">

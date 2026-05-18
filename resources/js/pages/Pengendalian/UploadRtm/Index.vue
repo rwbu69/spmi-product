@@ -74,6 +74,41 @@ const confirmDelete = () => {
 };
 
 const getDownloadUrl = (item: UploadRtm) => `/pengendalian/upload-rtm/${item.id}/download`;
+
+const handleDownload = async (url: string, defaultFilename: string) => {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            if (response.status === 404) throw new Error('Dokumen tidak ditemukan.');
+            throw new Error('Terjadi kesalahan pada server saat mengunduh dokumen.');
+        }
+        
+        let filename = defaultFilename;
+        const disposition = response.headers.get('Content-Disposition');
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+            if (matches != null && matches[1]) { 
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        
+        window.open(blobUrl, '_blank');
+        
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    } catch (error: any) {
+        alert(error.message);
+    }
+};
 </script>
 
 <template>
@@ -120,9 +155,9 @@ const getDownloadUrl = (item: UploadRtm) => `/pengendalian/upload-rtm/${item.id}
                         <CheckCircle2 class="size-3 text-green-500" /> {{ item.status_download }}
                     </div>
                     <div class="flex items-center gap-2">
-                        <a :href="getDownloadUrl(item)" target="_blank" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50" title="Unduh">
+                        <button type="button" @click.prevent="handleDownload(getDownloadUrl(item), item.nama_dokumen + '.pdf')" class="p-2 rounded-lg text-blue-600 hover:bg-blue-50" title="Unduh">
                             <Download class="size-4" />
-                        </a>
+                        </button>
                         <button type="button" class="p-2 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500" @click="openDelete(item)">
                             <Trash2 class="size-4" />
                         </button>

@@ -35,16 +35,16 @@ class ManajemenDokumenPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasAnyRole(['Admin', 'Fakultas']);
     }
 
     public function update(User $user, ManajemenDokumen $manajemenDokumen): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasAnyRole(['Admin', 'Fakultas']);
     }
 
     public function delete(User $user, ManajemenDokumen $manajemenDokumen): bool
     {
-        return $user->hasRole('Admin');
+        return $user->hasAnyRole(['Admin', 'Fakultas']);
     }
 }

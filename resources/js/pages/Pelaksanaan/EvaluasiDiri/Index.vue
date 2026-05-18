@@ -37,7 +37,7 @@ const page = usePage();
 const isAdmin = computed(() => (page.props.auth as any)?.roles?.includes('Admin'));
 const isAuditee = computed(() => {
     const roles = (page.props.auth as any)?.roles ?? [];
-    return roles.includes('Auditee') || roles.includes('Unit Penunjang');
+    return roles.includes('Auditee') || roles.includes('Unit Penunjang') || roles.includes('Fakultas');
 });
 
 const search    = ref(props.filters.search ?? '');
