@@ -26,9 +26,7 @@ class DatabaseSeeder extends Seeder
             ['username' => 'admin'],
             [
                 'name'               => 'Admin SPMI',
-                'email'              => 'admin@spmi.com',
                 'password'           => Hash::make('password'),
-                'email_verified_at'  => now(),
             ]
         );
         $user->syncRoles(['Admin']);
@@ -119,7 +117,7 @@ class DatabaseSeeder extends Seeder
         DB::table('evaluasi_diri')->insert([
             ['auditee_id' => $auditeeId1, 'pengaturan_periode_id' => $pengaturanId, 'nilai_evaluasi' => 90.0, 'status' => 'Submitted', 'created_at' => $now, 'updated_at' => $now],
         ]);
-        
+
         DB::table('nilai_mutu')->insert([
             ['auditee_id' => $auditeeId1, 'pengaturan_periode_id' => $pengaturanId, 'lembaga_akreditasi_id' => $lembagaId, 'nilai' => 91.5, 'created_at' => $now, 'updated_at' => $now],
             ['auditee_id' => $auditeeId2, 'pengaturan_periode_id' => $pengaturanId, 'lembaga_akreditasi_id' => $lembagaId, 'nilai' => 82.5, 'created_at' => $now, 'updated_at' => $now],
@@ -135,16 +133,16 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $jenisTemuanId = DB::table('jenis_temuan')->insertGetId([
-            'nama' => 'Observasi', 
-            'status' => 'Negatif', 
-            'created_at' => $now, 
+            'nama' => 'Observasi',
+            'status' => 'Negatif',
+            'created_at' => $now,
             'updated_at' => $now
         ]);
-        
+
         DB::table('kategori_temuan')->insert([
-            'nama_kategori' => 'Mayor', 
-            'jenis_temuan_id' => $jenisTemuanId, 
-            'created_at' => $now, 
+            'nama_kategori' => 'Mayor',
+            'jenis_temuan_id' => $jenisTemuanId,
+            'created_at' => $now,
             'updated_at' => $now
         ]);
     }

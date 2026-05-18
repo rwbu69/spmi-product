@@ -71,7 +71,7 @@ class EvaluasiDiriController extends Controller
                         $alert['is_active'] = true;
                     } elseif (now()->isAfter($selesai)) {
                         $alert['is_expired'] = true;
-                        $alert['hari_lewat'] = (int) now()->diffInDays($selesai);
+                        $alert['hari_lewat'] = abs((int) now()->diffInDays($selesai));
                     }
                 }
 

@@ -25,6 +25,8 @@ class NotificationController extends Controller
 
         $notification->markAsRead();
 
+        \Illuminate\Support\Facades\Cache::forget("user_notifications_{$user->id}_limit_5");
+
         return back();
     }
 
@@ -36,6 +38,8 @@ class NotificationController extends Controller
         }
 
         $user->unreadNotifications()->update(['read_at' => now()]);
+
+        \Illuminate\Support\Facades\Cache::forget("user_notifications_{$user->id}_limit_5");
 
         return back();
     }

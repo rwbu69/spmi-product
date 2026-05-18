@@ -9,18 +9,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\Models\Concerns\LogsActivity;
 use Spatie\Activitylog\Support\LogOptions;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use App\Models\Concerns\LogsMenuActivity;
 
 class Temuan extends Model
 {
-    use SoftDeletes, LogsActivity;
-
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->dontLogEmptyChanges();
-    }
+    use SoftDeletes, LogsMenuActivity;
 
     protected $table = 'temuan';
 

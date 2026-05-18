@@ -14,15 +14,7 @@ class LaporanAmiPolicy
 
     public function view(User $user, LaporanAmi $laporanAmi): bool
     {
-        if ($user->hasAnyRole(['Admin', 'Auditor', 'Fakultas'])) {
-            return true;
-        }
-
-        if ($user->auditee_id) {
-            return $laporanAmi->auditee_id === $user->auditee_id;
-        }
-
-        return false;
+        return $this->viewAny($user);
     }
 
     public function create(User $user): bool

@@ -40,7 +40,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Beranda / Dashboard
-    Route::get('/dashboard', [BerandaController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [BerandaController::class, 'index'])
+        ->middleware('role:Admin|Auditor|Auditee|Unit Penunjang|Fakultas')
+        ->name('dashboard');
 
     // ── Manajemen Referensi ────────────────────────────────
     Route::prefix('referensi')->name('referensi.')->middleware(['role:Admin'])->group(function () {

@@ -27,16 +27,7 @@ class DaftarTemuanController extends Controller
             'rencanaTindakLanjut',
         ]);
 
-        // Scope to current user's auditee for Auditee/Unit Penunjang
-        $user = auth()->user();
-        if ($user && $user->hasAnyRole(['Auditee', 'Unit Penunjang'])) {
-            $auditeeId = $user->auditee_id;
-            $unitId = $user->unit_penunjang_id;
-
-            if ($auditeeId) {
-                $query->where('auditee_id', $auditeeId);
-            }
-        }
+        // Cross-role findings are enabled, so no user-ownership scoping filters are applied here.
 
         if ($request->search) {
             $query->where('uraian_temuan', 'like', "%{$request->search}%");

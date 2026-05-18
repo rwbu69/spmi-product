@@ -8,7 +8,6 @@ test('user dapat dibuat dengan field username', function () {
     $user = User::factory()->create([
         'name'     => 'Budi Santoso',
         'username' => 'budi_santoso',
-        'email'    => 'budi@example.com',
     ]);
 
     expect($user->username)->toBe('budi_santoso');
@@ -60,56 +59,57 @@ test('non-admin tidak dapat mengakses manajemen pengguna', function () {
 test('admin dapat membuat pengguna baru dengan role', function () {
     seedRoles();
     $admin = userWithRole('Admin');
+    $auditor = \App\Models\Auditor::create(['nama' => 'Test Auditor', 'email' => 'auditor@example.com']);
 
-    $this->actingAs($admin)->post('/pengaturan/pengguna-backoffice', [
-        'name'     => 'Test User Baru',
-        'username' => 'test_user_baru',
-        'email'    => 'testbaru@example.com',
-        'password' => 'password123',
-        'role'     => 'Auditor',
+    $this->actingAs($admin)->post('/pengaturan/pengguna-portal', [
+        'name'       => 'Test User Baru',
+        'username'   => 'test_user_baru',
+        'password'   => 'password123',
+        'group'      => 'Auditor',
+        'auditor_id' => $auditor->id,
     ])->assertRedirect();
 
     $this->assertDatabaseHas('users', [
-        'username' => 'test_user_baru',
-        'email'    => 'testbaru@example.com',
+        'username'   => 'test_user_baru',
+        'auditor_id' => $auditor->id,
     ]);
 
-    $created = User::where('email', 'testbaru@example.com')->first();
+    $created = User::where('username', 'test_user_baru')->first();
     expect($created->hasRole('Auditor'))->toBeTrue();
 });
 
 test('membuat pengguna tanpa username menghasilkan error validasi', function () {
     $admin = userWithRole('Admin');
 
-    $this->actingAs($admin)->post('/pengaturan/pengguna-backoffice', [
+    $this->actingAs($admin)->post('/pengaturan/pengguna-portal', [
         'name'     => 'Test',
-        'email'    => 'testnouser@example.com',
         'password' => 'password123',
-        'role'     => 'Auditor',
+        'group'    => 'Auditor',
     ])->assertSessionHasErrors('username');
 });
 
-test('membuat pengguna tanpa role menghasilkan error validasi', function () {
+test('membuat pengguna tanpa group menghasilkan error validasi', function () {
     $admin = userWithRole('Admin');
 
-    $this->actingAs($admin)->post('/pengaturan/pengguna-backoffice', [
+    $this->actingAs($admin)->post('/pengaturan/pengguna-portal', [
         'name'     => 'Test',
         'username' => 'test_norol',
-        'email'    => 'testnorol@example.com',
         'password' => 'password123',
-    ])->assertSessionHasErrors('role');
+    ])->assertSessionHasErrors('group');
 });
 
 test('admin dapat mengupdate nama pengguna', function () {
     seedRoles();
     $admin  = userWithRole('Admin');
+    $auditor = \App\Models\Auditor::create(['nama' => 'Test Auditor', 'email' => 'auditor@example.com']);
     $target = userWithRole('Auditor');
+    $target->update(['auditor_id' => $auditor->id]);
 
-    $this->actingAs($admin)->put("/pengaturan/pengguna-backoffice/{$target->id}", [
-        'name'     => 'Nama Telah Diubah',
-        'username' => $target->username,
-        'email'    => $target->email,
-        'role'     => 'Auditor',
+    $this->actingAs($admin)->put("/pengaturan/pengguna-portal/{$target->id}", [
+        'name'       => 'Nama Telah Diubah',
+        'username'   => $target->username,
+        'group'      => 'Auditor',
+        'auditor_id' => $auditor->id,
     ])->assertRedirect();
 
     $this->assertDatabaseHas('users', [
@@ -121,13 +121,16 @@ test('admin dapat mengupdate nama pengguna', function () {
 test('admin dapat mengubah role pengguna', function () {
     seedRoles();
     $admin  = userWithRole('Admin');
+    $auditor = \App\Models\Auditor::create(['nama' => 'Test Auditor', 'email' => 'auditor@example.com']);
+    $fakultasEntity = \App\Models\AuditeePusat::create(['nama' => 'Test Fakultas']);
     $target = userWithRole('Auditor');
+    $target->update(['auditor_id' => $auditor->id]);
 
-    $this->actingAs($admin)->put("/pengaturan/pengguna-backoffice/{$target->id}", [
-        'name'     => $target->name,
-        'username' => $target->username,
-        'email'    => $target->email,
-        'role'     => 'Fakultas',
+    $this->actingAs($admin)->put("/pengaturan/pengguna-portal/{$target->id}", [
+        'name'             => $target->name,
+        'username'         => $target->username,
+        'group'            => 'Fakultas',
+        'auditee_pusat_id' => $fakultasEntity->id,
     ])->assertRedirect();
 
     $target->refresh();

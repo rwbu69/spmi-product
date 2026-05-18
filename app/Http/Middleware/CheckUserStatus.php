@@ -10,13 +10,13 @@ class CheckUserStatus
 {
     public function handle(Request $request, Closure $next)
     {
-        if (Auth::check() && !Auth::user()->is_active) {
+        if (Auth::check() && !Auth::user()->hasRole('Admin') && !Auth::user()->is_active) {
             Auth::logout();
             $request->session()->invalidate();
             $request->session()->regenerateToken();
 
             return redirect()->route('login')->withErrors([
-                'email' => 'Akun Anda tidak aktif. Silakan hubungi administrator.',
+                'username' => 'Akun Anda tidak aktif. Silakan hubungi administrator.',
             ]);
         }
 

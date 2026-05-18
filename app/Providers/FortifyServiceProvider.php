@@ -36,6 +36,31 @@ class FortifyServiceProvider extends ServiceProvider
             \Laravel\Fortify\Contracts\LoginResponse::class,
             \App\Http\Responses\LoginResponse::class
         );
+
+        Fortify::authenticateUsing(function (Request $request) {
+            $login = $request->input('username');
+
+            if (empty($login)) {
+                return null;
+            }
+
+            $user = \App\Models\User::where('username', $login)->first();
+
+            if (! $user || ! \Illuminate\Support\Facades\Hash::check($request->input('password'), $user->password)) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'username' => __('auth.failed'),
+                ]);
+            }
+
+            // Pengecekan is_active hanya berlaku untuk group selain Admin
+            if (! $user->hasRole('Admin') && ! $user->is_active) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'username' => 'Akun Anda tidak aktif. Silakan hubungi administrator untuk informasi lebih lanjut.',
+                ]);
+            }
+
+            return $user;
+        });
     }
 
     /**
@@ -58,21 +83,6 @@ class FortifyServiceProvider extends ServiceProvider
             'status' => $request->session()->get('status'),
         ]));
 
-        Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/ResetPassword', [
-            'email' => $request->email,
-            'token' => $request->route('token'),
-        ]));
-
-        Fortify::requestPasswordResetLinkView(fn (Request $request) => Inertia::render('auth/ForgotPassword', [
-            'status' => $request->session()->get('status'),
-        ]));
-
-        Fortify::verifyEmailView(fn (Request $request) => Inertia::render('auth/VerifyEmail', [
-            'status' => $request->session()->get('status'),
-        ]));
-
-        Fortify::registerView(fn () => Inertia::render('auth/Register'));
-
         Fortify::twoFactorChallengeView(fn () => Inertia::render('auth/TwoFactorChallenge'));
 
         Fortify::confirmPasswordView(fn () => Inertia::render('auth/ConfirmPassword'));
@@ -88,9 +98,9 @@ class FortifyServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input('username') ?? '') . '|' . $request->ip());
 
-            return Limit::perMinute(5)->by($throttleKey);
+            return Limit::perMinute(20)->by($throttleKey);
         });
     }
 }

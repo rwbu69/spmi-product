@@ -23,6 +23,7 @@ class SystemNotificationService
         $allowedKeys = $this->allowedMenuKeys($user);
         $since = now()->subDays(self::MAX_DAYS);
 
+        // Fetch notifications dynamically in real-time to prevent cached state synchronization bugs
         $notifications = $user->notifications()
             ->whereIn('data->menu_key', $allowedKeys)
             ->where('created_at', '>=', $since)
@@ -101,7 +102,7 @@ class SystemNotificationService
         $subject = $activity->subject;
         $event = $activity->event ?? $activity->description;
         $eventLabel = $this->eventLabel($event);
-        $subjectName = $this->resolveSubjectName($subject, $activity->subject_type);
+        $subjectName = $this->resolveSubjectName($subject, $activity->subject_type, $activity->properties?->toArray());
         $title = $module['label'] ?? 'Notifikasi';
         $message = $subjectName
             ? "{$title} '{$subjectName}' {$eventLabel}."
@@ -143,8 +144,14 @@ class SystemNotificationService
 
     public function allowedMenuKeys(User $user): array
     {
-        $roles = $user->getRoleNames()->toArray();
         $modules = config('notification_menus.modules', []);
+
+        // Admin has complete bypass access to see notifications from all system menus and groups
+        if ($user->hasRole('Admin')) {
+            return array_keys($modules);
+        }
+
+        $roles = $user->getRoleNames()->toArray();
 
         return collect($modules)
             ->filter(fn ($module) => count(array_intersect($roles, Arr::wrap($module['roles'] ?? []))) > 0)
@@ -160,12 +167,22 @@ class SystemNotificationService
 
         if ($subjectType === User::class) {
             $subject = $activity->subject;
-            if ($subject && method_exists($subject, 'getRoleNames')) {
-                $roles = $subject->getRoleNames()->toArray();
-                $isPortal = count(array_intersect($roles, self::PORTAL_ROLES)) > 0;
+            $isPortal = false;
 
-                return $isPortal ? 'pengaturan_pengguna_portal' : 'pengaturan_pengguna_backoffice';
+            if ($subject) {
+                if (method_exists($subject, 'getRoleNames')) {
+                    $roles = $subject->getRoleNames()->toArray();
+                    $isPortal = count(array_intersect($roles, self::PORTAL_ROLES)) > 0;
+                }
+                if (!$isPortal) {
+                    $isPortal = $subject->auditee_id || $subject->auditor_id || $subject->auditee_pusat_id || $subject->unit_penunjang_id;
+                }
+            } else {
+                $attrs = $activity->properties['old'] ?? $activity->properties['attributes'] ?? [];
+                $isPortal = !empty($attrs['auditee_id']) || !empty($attrs['auditor_id']) || !empty($attrs['auditee_pusat_id']) || !empty($attrs['unit_penunjang_id']);
             }
+
+            return $isPortal ? 'pengaturan_pengguna_portal' : 'pengaturan_pengguna_backoffice';
         }
 
         return $map[$subjectType] ?? null;
@@ -192,28 +209,40 @@ class SystemNotificationService
         return route($routeName);
     }
 
-    private function resolveSubjectName(mixed $subject, ?string $subjectType): ?string
+    private function resolveSubjectName(mixed $subject, ?string $subjectType, ?array $properties = null): ?string
     {
-        if (! $subject) {
+        $data = $subject;
+        if (! $data && $properties && isset($properties['old'])) {
+            $data = (object) $properties['old'];
+        }
+
+        if (! $data) {
             return null;
         }
 
-        if ($subject instanceof LaporanAmi) {
-            return $subject->auditee?->nama_auditee;
+        if ($data instanceof LaporanAmi || (is_object($data) && isset($data->auditee_id) && !isset($data->nama_auditee) && $subjectType === LaporanAmi::class)) {
+            $auditeeId = $data->auditee_id ?? null;
+            if ($auditeeId) {
+                $auditee = \App\Models\Auditee::find($auditeeId);
+                if ($auditee) {
+                    return $auditee->nama_auditee;
+                }
+            }
+            return $data->auditee?->nama_auditee ?? null;
         }
 
-        if ($subject instanceof ManajemenDokumen) {
-            return $subject->nama_dokumen;
+        if ($data instanceof ManajemenDokumen || (is_object($data) && $subjectType === ManajemenDokumen::class)) {
+            return $data->nama_dokumen ?? null;
         }
 
         foreach (['nama_auditee', 'nama_unit', 'nama_lembaga', 'nama_kategori', 'nama_jenis', 'nama_standar', 'nama', 'kode'] as $field) {
-            if (isset($subject->{$field}) && $subject->{$field}) {
-                return (string) $subject->{$field};
+            if (isset($data->{$field}) && $data->{$field}) {
+                return (string) $data->{$field};
             }
         }
 
         if ($subjectType === User::class) {
-            return $subject->name ?? null;
+            return $data->name ?? null;
         }
 
         return null;

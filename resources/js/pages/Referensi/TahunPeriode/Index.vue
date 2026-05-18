@@ -143,6 +143,23 @@ const confirmDelete = () => {
             {{ flash.error }}
         </div>
 
+        <!-- Info Keterangan Aturan Status Periode -->
+        <div class="rounded-xl border border-blue-100 bg-blue-50/30 p-4 shadow-sm">
+            <div class="flex gap-3">
+                <div class="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+                    <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div>
+                    <h5 class="text-xs font-bold text-blue-900">Aturan Status Periode</h5>
+                    <p class="mt-1 text-[11px] leading-relaxed text-blue-700">
+                        Hanya satu periode yang dapat aktif pada satu waktu. Saat periode baru ditambahkan, periode tersebut akan otomatis menjadi aktif dan periode sebelumnya akan dinonaktifkan. Untuk mengganti periode aktif, cukup aktifkan periode yang diinginkan.
+                    </p>
+                </div>
+            </div>
+        </div>
+
         <!-- Search -->
         <SearchInput v-model="search" placeholder="Cari tahun..." />
 
@@ -208,7 +225,7 @@ const confirmDelete = () => {
         @close="closeForm"
     >
         <form @submit.prevent="submitForm" class="space-y-4">
-            <FormField label="Tahun" :required="true" :error="form.errors.tahun">
+            <FormField label="Tahun" :required="true">
                 <BaseInput
                     v-model="form.tahun"
                     type="number"
@@ -219,7 +236,7 @@ const confirmDelete = () => {
                 />
             </FormField>
 
-            <FormField label="Status" :required="true" :error="form.errors.status">
+            <FormField label="Status" :required="true">
                 <BaseSelect v-model="form.status" :error="form.errors.status">
                     <option value="Aktif">Aktif</option>
                     <option value="Tidak Aktif">Tidak Aktif</option>

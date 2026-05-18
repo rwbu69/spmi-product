@@ -15,7 +15,14 @@ class StandarMutuController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = StandarMutu::with(['lembagaAkreditasi', 'tahunPeriode', 'childrenRecursive.indikator', 'indikator'])
+        $query = StandarMutu::with([
+            'lembagaAkreditasi',
+            'tahunPeriode',
+            'indikator',
+            'childrenRecursive.indikator',
+            'childrenRecursive.childrenRecursive.indikator',
+            'childrenRecursive.childrenRecursive.childrenRecursive.indikator'
+        ])
             ->whereNull('parent_id');
 
         if ($request->search) {

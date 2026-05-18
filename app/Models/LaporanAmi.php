@@ -5,12 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Activitylog\Models\Concerns\LogsActivity;
-use Spatie\Activitylog\Support\LogOptions;
+use App\Models\Concerns\LogsMenuActivity;
 
 class LaporanAmi extends Model
 {
-    use LogsActivity;
+    use LogsMenuActivity;
 
     protected $table = 'laporan_ami';
 
@@ -28,24 +27,9 @@ class LaporanAmi extends Model
 
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->hasAnyRole(['Admin', 'Auditor', 'Fakultas'])) {
-            return $query;
-        }
-
-        if ($user->auditee_id) {
-            return $query->where('auditee_id', $user->auditee_id);
-        }
-
-        return $query->whereRaw('1 = 0');
+        return $query;
     }
 
-    public function getActivitylogOptions(): LogOptions
-    {
-        return LogOptions::defaults()
-            ->logAll()
-            ->logOnlyDirty()
-            ->dontLogEmptyChanges();
-    }
 
     public function pengaturanPeriode(): BelongsTo
     {

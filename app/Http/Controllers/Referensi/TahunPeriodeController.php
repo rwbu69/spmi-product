@@ -28,14 +28,31 @@ class TahunPeriodeController extends Controller
 
     public function store(TahunPeriodeRequest $request): RedirectResponse
     {
-        TahunPeriode::create($request->validated());
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request) {
+            // Automatically turn off all existing active periods
+            TahunPeriode::where('status', 'Aktif')->update(['status' => 'Tidak Aktif']);
+            
+            // Create the new period as active
+            TahunPeriode::create(array_merge($request->validated(), ['status' => 'Aktif']));
+        });
 
         return back()->with('success', 'Tahun periode berhasil ditambahkan.');
     }
 
     public function update(TahunPeriodeRequest $request, TahunPeriode $tahunPeriode): RedirectResponse
     {
-        $tahunPeriode->update($request->validated());
+        \Illuminate\Support\Facades\DB::transaction(function () use ($request, $tahunPeriode) {
+            $validated = $request->validated();
+            
+            // If the period status is updated to active, deactivate all other periods
+            if (($validated['status'] ?? null) === 'Aktif') {
+                TahunPeriode::where('id', '!=', $tahunPeriode->id)
+                    ->where('status', 'Aktif')
+                    ->update(['status' => 'Tidak Aktif']);
+            }
+            
+            $tahunPeriode->update($validated);
+        });
 
         return back()->with('success', 'Tahun periode berhasil diperbarui.');
     }

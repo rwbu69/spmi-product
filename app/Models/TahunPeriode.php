@@ -29,6 +29,17 @@ class TahunPeriode extends Model
         return $this->hasMany(UploadLaporanRtm::class, 'tahun_periode_id');
     }
 
+    protected static function booted(): void
+    {
+        static::saved(function ($model) {
+            \Illuminate\Support\Facades\Cache::forget('tahun_periode_aktif');
+        });
+
+        static::deleted(function ($model) {
+            \Illuminate\Support\Facades\Cache::forget('tahun_periode_aktif');
+        });
+    }
+
     public function isAktif(): bool
     {
         return $this->status === 'Aktif';
