@@ -45,6 +45,7 @@ const isAuditee = computed(() => {
     const roles = (page.props.auth as any)?.roles ?? [];
     return roles.includes('Auditee') || roles.includes('Unit Penunjang');
 });
+const canManage = computed(() => isAdmin.value || (page.props.auth as any)?.roles?.includes('Fakultas'));
 
 const filterKategori = ref(props.filters.kategori_id ?? '');
 const filterUser     = ref('');
@@ -170,6 +171,41 @@ const confirmDelete = () => {
 const getDownloadUrl = (item: ManajemenDokumen) => `/dokumen/manajemen/${item.id}/download`;
 const getOwnerName   = (item: ManajemenDokumen) => item.auditee?.nama_auditee ?? item.unit_penunjang?.nama_unit ?? '-';
 
+const handleDownload = async (url: string, defaultFilename: string) => {
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            if (response.status === 404) throw new Error('Dokumen tidak ditemukan.');
+            throw new Error('Terjadi kesalahan pada server saat mengunduh dokumen.');
+        }
+        
+        let filename = defaultFilename;
+        const disposition = response.headers.get('Content-Disposition');
+        if (disposition && disposition.indexOf('filename=') !== -1) {
+            const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+            if (matches != null && matches[1]) { 
+                filename = matches[1].replace(/['"]/g, '');
+            }
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(new Blob([blob], { type: 'application/pdf' }));
+        
+        window.open(blobUrl, '_blank');
+        
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 100);
+    } catch (error: any) {
+        alert(error.message);
+    }
+};
+
 const filteredData = computed(() => {
     let rows = props.data.data;
     if (filterUser.value) rows = rows.filter(r => r.user.name === filterUser.value);
@@ -205,7 +241,7 @@ const allUsers = computed(() => {
         </div>
 
         <div class="flex items-center justify-between">
-            <button v-if="isAdmin" type="button" class="inline-flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" @click="openCreate">
+            <button v-if="canManage" type="button" class="inline-flex items-center gap-2 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700" @click="openCreate">
                 <Plus class="size-4" /> Tambah
             </button>
             <div class="flex items-center gap-4">
@@ -249,9 +285,9 @@ const allUsers = computed(() => {
                         <td class="px-4 py-3 text-gray-500">{{ (data.current_page - 1) * data.per_page + idx + 1 }}</td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-1">
-                                <a :href="getDownloadUrl(item)" target="_blank" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50" title="Unduh"><Download class="size-4" /></a>
-                                <button v-if="isAdmin" type="button" class="p-1.5 rounded-lg text-gray-400 hover:bg-blue-50 hover:text-blue-600" @click="openEdit(item)"><Edit2 class="size-4" /></button>
-                                <button v-if="isAdmin" type="button" class="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500" @click="() => { deleteTarget = item; showDelete = true; }"><Trash2 class="size-4" /></button>
+                                <button type="button" @click.prevent="handleDownload(getDownloadUrl(item), item.nama_dokumen + '.pdf')" class="p-1.5 rounded-lg text-blue-600 hover:bg-blue-50" title="Unduh"><Download class="size-4" /></button>
+                                <button v-if="canManage" type="button" class="p-1.5 rounded-lg text-gray-400 hover:bg-blue-50 hover:text-blue-600" @click="openEdit(item)"><Edit2 class="size-4" /></button>
+                                <button v-if="canManage" type="button" class="p-1.5 rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500" @click="() => { deleteTarget = item; showDelete = true; }"><Trash2 class="size-4" /></button>
                             </div>
                         </td>
                         <td class="px-4 py-3 font-medium text-gray-900 text-xs">{{ item.nama_dokumen }}</td>

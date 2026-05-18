@@ -65,43 +65,28 @@ class DaftarKesesuaianController extends Controller
         ]);
     }
 
-    public function export(Request $request): HttpResponse
+    public function export(Request $request)
     {
         $items = $this->buildQuery($request)->latest()->get();
 
-        $filename = 'daftar_kesesuaian_' . now()->format('Ymd_His') . '.csv';
+        $data = [];
+        foreach ($items as $i => $item) {
+            $data[] = [
+                $i + 1,
+                $item->auditee->nama_auditee ?? '-',
+                $item->standarMutu->nama_standar ?? '-',
+                $item->standarMutu->kode ?? '-',
+                $item->temuan_positif ?? '',
+                $item->deskripsi ?? '',
+                $item->peningkatan ?? '',
+                $item->nilai_mutu ?? 0,
+                $item->pengaturanPeriode->tahunPeriode->tahun ?? '-',
+                $item->pengaturanPeriode->lembagaAkreditasi->nama_lembaga ?? '-',
+            ];
+        }
 
-        $headers = [
-            'Content-Type'        => 'text/csv; charset=UTF-8',
-            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-        ];
-
-        $callback = function () use ($items) {
-            $handle = fopen('php://output', 'w');
-            // BOM for Excel UTF-8
-            fputs($handle, "\xEF\xBB\xBF");
-
-            // Header row
-            fputcsv($handle, ['No', 'Auditee', 'Standar Mutu', 'Kode', 'Temuan Positif', 'Deskripsi', 'Peningkatan', 'Nilai Mutu', 'Periode', 'Lembaga']);
-
-            foreach ($items as $i => $item) {
-                fputcsv($handle, [
-                    $i + 1,
-                    $item->auditee->nama_auditee ?? '-',
-                    $item->standarMutu->nama_standar ?? '-',
-                    $item->standarMutu->kode ?? '-',
-                    $item->temuan_positif ?? '',
-                    $item->deskripsi ?? '',
-                    $item->peningkatan ?? '',
-                    $item->nilai_mutu ?? 0,
-                    $item->pengaturanPeriode->tahunPeriode->tahun ?? '-',
-                    $item->pengaturanPeriode->lembagaAkreditasi->nama_lembaga ?? '-',
-                ]);
-            }
-            fclose($handle);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        $filename = 'daftar_kesesuaian_' . now()->format('Ymd_His') . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\DaftarKesesuaianExport($data), $filename);
     }
 
     public function store(Request $request): RedirectResponse

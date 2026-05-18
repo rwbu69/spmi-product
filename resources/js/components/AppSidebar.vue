@@ -219,31 +219,13 @@ const unitPenunjangNavGroups: NavGroup[] = [
     { title: 'Laporan AMI',         icon: Download,       href: '/ami/laporan-ami' },
 ];
 
-// FAKULTAS nav groups
+// FAKULTAS nav groups - flat structure
 const fakultasNavGroups: NavGroup[] = [
-    {
-        title: 'Evaluasi AMI',
-        icon: FileSearch,
-        children: [
-            { title: 'Rekap Desk Evaluation', href: '/ami/rekap-desk-eval' },
-            { title: 'Laporan AMI', href: '/ami/laporan-ami' },
-        ],
-    },
-    {
-        title: 'Pengendalian & Peningkatan',
-        icon: ClipboardCheck,
-        children: [
-            { title: 'Daftar Temuan', href: '/pengendalian/daftar-temuan' },
-            { title: 'Daftar Kesesuaian', href: '/pengendalian/kesesuaian' },
-        ],
-    },
-    {
-        title: 'Manajemen Dokumen',
-        icon: FolderOpen,
-        children: [
-            { title: 'Manajemen Dokumen', href: '/dokumen/manajemen' },
-        ],
-    },
+    { title: 'Evaluasi Diri',       icon: ClipboardList,  href: '/pelaksanaan/evaluasi-diri' },
+    { title: 'Daftar Temuan',       icon: FileText,       href: '/pengendalian/daftar-temuan' },
+    { title: 'Daftar Kesesuaian',   icon: ClipboardCheck, href: '/pengendalian/kesesuaian' },
+    { title: 'Hasil Desk Evaluation', icon: FileSearch,   href: '/ami/rekap-desk-eval' },
+    { title: 'Manajemen Dokumen',   icon: FolderOpen,     href: '/dokumen/manajemen' },
 ];
 
 // Pick nav groups based on role
