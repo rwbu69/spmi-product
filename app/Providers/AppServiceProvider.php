@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Listeners\SendMenuNotification;
 use App\Models\LaporanAmi;
 use App\Models\ManajemenDokumen;
+use App\Observers\SystemMenuObserver;
 use App\Policies\LaporanAmiPolicy;
 use App\Policies\ManajemenDokumenPolicy;
 use Carbon\CarbonImmutable;
@@ -34,6 +35,7 @@ class AppServiceProvider extends ServiceProvider
         $this->configureDefaults();
         $this->registerPolicies();
         $this->registerActivityNotifications();
+        $this->registerModelNotifications();
     }
 
     /**
@@ -67,5 +69,17 @@ class AppServiceProvider extends ServiceProvider
     protected function registerActivityNotifications(): void
     {
         Event::listen(ActivityLogged::class, [SendMenuNotification::class, 'handle']);
+    }
+
+    protected function registerModelNotifications(): void
+    {
+        $observer = SystemMenuObserver::class;
+        $map = config('notification_menus.model_map', []);
+
+        foreach (array_keys($map) as $modelClass) {
+            if (class_exists($modelClass)) {
+                $modelClass::observe($observer);
+            }
+        }
     }
 }
