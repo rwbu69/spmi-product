@@ -26,8 +26,8 @@ class DeskEvaluationAuditorController extends Controller
             ->get()
             ->groupBy('pengaturan_periode_id')
             ->map(fn ($group) => $group->map(fn ($e) => [
-                'id'          => $e->auditee->id,
-                'nama_auditee' => $e->auditee->nama_auditee,
+                'id'          => $e->auditee?->id,
+                'nama_auditee' => $e->auditee?->nama_auditee ?? 'Auditee Terhapus/Tidak Diketahui',
             ])->values());
 
         return Inertia::render('Auditor/DeskEvaluation/Index', [

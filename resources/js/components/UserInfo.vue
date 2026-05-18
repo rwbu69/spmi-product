@@ -4,12 +4,9 @@ import type { User } from '@/types';
 
 type Props = {
     user: User;
-    showEmail?: boolean;
 };
 
-const props = withDefaults(defineProps<Props>(), {
-    showEmail: false,
-});
+const props = defineProps<Props>();
 </script>
 
 <template>
@@ -19,8 +16,6 @@ const props = withDefaults(defineProps<Props>(), {
 
     <div class="grid flex-1 text-left text-sm leading-tight">
         <span class="truncate font-medium">{{ user.name }}</span>
-        <span v-if="showEmail" class="truncate text-xs opacity-70">{{
-            user.email
-        }}</span>
+        <span class="truncate text-xs opacity-70">{{ user.username }}</span>
     </div>
 </template>

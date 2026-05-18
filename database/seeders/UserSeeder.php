@@ -14,7 +14,6 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         $auditee = User::firstOrCreate(
-            ['email' => 'merlin@example.com'],
             [
                 'name' => 'Merlin',
                 'username' => 'merlin',
@@ -23,8 +22,16 @@ class UserSeeder extends Seeder
         );
         $auditee->assignRole('Auditee');
 
+        $admin = User::firstOrCreate(
+            [
+                'name' => 'Admin2',
+                'username' => 'admin2',
+                'password' => Hash::make('password')
+            ]
+        );
+        $admin->assignRole('Admin');
+
         $auditor = User::firstOrCreate(
-            ['email' => 'arman@example.com'],
             [
                 'name' => 'Arman',
                 'username' => 'arman',

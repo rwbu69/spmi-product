@@ -17,7 +17,7 @@ class PenggunaBackofficeController extends Controller
 {
     public function index(Request $request): Response
     {
-        $query = User::with('roles')->withTrashed(false)
+        $query = User::with(['roles', 'auditeePusat'])->withTrashed(false)
             ->whereHas('roles', fn ($q) => $q->where('name', 'Admin'));
 
         if ($request->search) {
@@ -33,7 +33,7 @@ class PenggunaBackofficeController extends Controller
         $data->getCollection()->transform(function ($user) {
             $unit = '-';
             if ($user->auditee_pusat_id) {
-                $pusat = AuditeePusat::find($user->auditee_pusat_id);
+                $pusat = $user->auditeePusat;
                 $unit = $pusat ? "[{$pusat->nama}]" : '-';
             }
             $user->unit_display = $unit;
@@ -61,7 +61,6 @@ class PenggunaBackofficeController extends Controller
         $user = User::create([
             'name'             => $validated['name'],
             'username'         => $validated['username'],
-            'email'            => $validated['username'] . '@system.local',
             'password'         => Hash::make($validated['password']),
             'auditee_pusat_id' => $validated['auditee_pusat_id'] ?? null,
             'keterangan'       => $validated['keterangan'] ?? null,

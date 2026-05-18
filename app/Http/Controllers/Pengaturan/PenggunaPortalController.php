@@ -71,7 +71,6 @@ class PenggunaPortalController extends Controller
         $user = User::create([
             'name'              => $validated['name'],
             'username'          => $validated['username'],
-            'email'             => $validated['username'] . '@portal.local',
             'password'          => Hash::make($validated['password']),
             'auditee_id'        => $validated['auditee_id'] ?? null,
             'auditor_id'        => $validated['auditor_id'] ?? null,

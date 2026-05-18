@@ -218,7 +218,7 @@ const getStatusBadge = (s: string) => ({
                     </thead>
                     <tbody class="divide-y divide-gray-100">
                         <tr v-if="data.data.length === 0">
-                            <td colspan="7" class="px-4 py-12 text-center text-gray-400 italic">No data available in table</td>
+                            <td colspan="7" class="px-4 py-12 text-center text-gray-400 italic">Tidak ada data tersedia</td>
                         </tr>
                         <tr v-for="(item, idx) in data.data" :key="item.id" class="hover:bg-gray-50 transition">
                             <td class="px-3 py-3 text-gray-500 text-center">{{ (data.current_page - 1) * data.per_page + idx + 1 }}</td>

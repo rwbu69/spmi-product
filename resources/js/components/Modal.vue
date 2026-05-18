@@ -40,7 +40,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
         >
             <div
                 v-if="show"
-                class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 sm:py-8"
+                class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6"
             >
                 <!-- Backdrop -->
                 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="emit('close')" />
@@ -56,7 +56,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
                 >
                     <div
                         v-if="show"
-                        class="relative z-10 w-full rounded-xl bg-white shadow-2xl dark:bg-gray-900"
+                        class="relative z-10 w-full rounded-xl bg-white shadow-2xl dark:bg-gray-900 max-h-[90vh] flex flex-col"
                         :class="maxWidthClass[maxWidth ?? 'lg']"
                     >
                         <!-- Header -->
@@ -74,7 +74,7 @@ onUnmounted(() => document.removeEventListener('keydown', handleKeydown));
                         </div>
 
                         <!-- Body -->
-                        <div class="max-h-[calc(100vh-10rem)] overflow-y-auto px-6 py-5">
+                        <div class="overflow-y-auto px-6 py-5 flex-1">
                             <slot />
                         </div>
                     </div>

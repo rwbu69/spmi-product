@@ -37,7 +37,7 @@ const userManuals: { label: string; href: string }[] = [
 <template>
     <DropdownMenuLabel class="p-0 font-normal">
         <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-            <UserInfo :user="user" :show-email="true" />
+            <UserInfo :user="user" />
         </div>
     </DropdownMenuLabel>
     <DropdownMenuSeparator />

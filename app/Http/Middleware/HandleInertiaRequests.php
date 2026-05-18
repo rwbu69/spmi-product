@@ -51,8 +51,10 @@ class HandleInertiaRequests extends Middleware
         // Resolve active period year
         $periodeAktif = null;
         try {
-            $aktif = \App\Models\TahunPeriode::where('status', 'Aktif')->first();
-            $periodeAktif = $aktif?->tahun;
+            $periodeAktif = \Illuminate\Support\Facades\Cache::remember('tahun_periode_aktif', 86400, function () {
+                $aktif = \App\Models\TahunPeriode::where('status', 'Aktif')->first();
+                return $aktif?->tahun;
+            });
         } catch (\Exception $e) {
             // Silently ignore
         }

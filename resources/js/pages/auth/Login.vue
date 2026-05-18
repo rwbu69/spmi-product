@@ -11,11 +11,12 @@ import { Spinner } from '@/components/ui/spinner';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
+import { ref, onMounted } from 'vue';
 
 defineOptions({
     layout: {
         title: 'Masuk ke Akun Anda',
-        description: 'Masukkan email dan kata sandi untuk masuk ke dalam sistem',
+        description: 'Masukkan username dan kata sandi untuk masuk ke dalam sistem',
     },
 });
 
@@ -25,11 +26,14 @@ defineProps<{
     canRegister: boolean; // Kept prop but we won't show it per user request
 }>();
 
-import { ref, onMounted } from 'vue';
 const num1 = ref(0);
 const num2 = ref(0);
 const captchaInput = ref('');
 const captchaError = ref(false);
+
+const usernameValue = ref('');
+const passwordValue = ref('');
+const frontendErrors = ref<{ username?: string; password?: string }>({});
 
 const generateCaptcha = () => {
     num1.value = Math.floor(Math.random() * 10) + 1;
@@ -42,13 +46,35 @@ onMounted(() => {
     generateCaptcha();
 });
 
-const validateCaptcha = (e: Event) => {
-    if (parseInt(captchaInput.value) !== num1.value + num2.value) {
-        e.preventDefault();
+const handleLogin = (e: Event) => {
+    frontendErrors.value = {};
+    let isValid = true;
+
+    // Validate username
+    if (!usernameValue.value) {
+        frontendErrors.value.username = 'Username tidak boleh kosong.';
+        isValid = false;
+    }
+
+    // Validate password
+    if (!passwordValue.value) {
+        frontendErrors.value.password = 'Kata sandi tidak boleh kosong.';
+        isValid = false;
+    }
+
+    // Validate Captcha
+    const captchaValue = parseInt(captchaInput.value);
+    if (isNaN(captchaValue) || captchaValue !== num1.value + num2.value) {
         captchaError.value = true;
         generateCaptcha();
+        isValid = false;
     } else {
         captchaError.value = false;
+    }
+
+    if (!isValid) {
+        e.preventDefault();
+        e.stopPropagation();
     }
 };
 </script>
@@ -67,6 +93,7 @@ const validateCaptcha = (e: Event) => {
         v-bind="store.form()"
         :reset-on-success="['password']"
         v-slot="{ errors, processing }"
+        @submit="handleLogin"
         class="flex flex-col gap-6"
     >
         <div class="grid gap-6">
@@ -80,22 +107,15 @@ const validateCaptcha = (e: Event) => {
                     autofocus
                     :tabindex="1"
                     autocomplete="username"
-                    placeholder="Masukkan username"
+                    placeholder="Masukkan username Anda"
+                    v-model="usernameValue"
                 />
-                <InputError :message="errors.username" />
+                <InputError :message="frontendErrors.username || errors.username" />
             </div>
 
             <div class="grid gap-2">
                 <div class="flex items-center justify-between">
                     <Label for="password">Password</Label>
-                    <!-- <TextLink
-                        v-if="canResetPassword"
-                        :href="request()"
-                        class="text-sm"
-                        :tabindex="6"
-                    >
-                        Lupa Password?
-                    </TextLink> -->
                 </div>
                 <PasswordInput
                     id="password"
@@ -104,8 +124,9 @@ const validateCaptcha = (e: Event) => {
                     :tabindex="2"
                     autocomplete="current-password"
                     placeholder="Password Anda"
+                    v-model="passwordValue"
                 />
-                <InputError :message="errors.password" />
+                <InputError :message="frontendErrors.password || errors.password" />
             </div>
 
             <!-- CAPTCHA LOKAL -->
@@ -143,7 +164,6 @@ const validateCaptcha = (e: Event) => {
                 class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white"
                 :tabindex="5"
                 :disabled="processing"
-                @click="validateCaptcha"
             >
                 <Spinner v-if="processing" />
                 Masuk Sistem

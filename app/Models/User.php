@@ -20,7 +20,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable, TwoFactorAuthenticatable, HasRoles, SoftDeletes, LogsActivity;
 
     protected $fillable = [
-        'name', 'username', 'email', 'password',
+        'name', 'username', 'password',
         'keterangan', 'is_active',
         'auditee_id', 'auditor_id', 'auditee_pusat_id', 'unit_penunjang_id',
     ];
@@ -30,9 +30,26 @@ class User extends Authenticatable
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['name', 'email', 'username', 'password'])
-            ->logOnlyDirty()
-            ->dontLogEmptyChanges();
+            ->logOnly(['name', 'username']);
+    }
+
+    public function beforeActivityLogged(\Illuminate\Database\Eloquent\Model $activity, string $eventName)
+    {
+        $props = $activity->properties ? $activity->properties->toArray() : [];
+        unset($props['ip']);
+        unset($props['user_agent']);
+        $activity->properties = collect($props);
+
+        if ($eventName === 'created') {
+            $activity->data_lama = null;
+            $activity->data_baru = json_encode($this->getAttributes());
+        } elseif ($eventName === 'updated') {
+            $activity->data_lama = json_encode($this->getOriginal());
+            $activity->data_baru = json_encode($this->getAttributes());
+        } elseif ($eventName === 'deleted') {
+            $activity->data_lama = json_encode($this->getOriginal() ?: $this->getAttributes());
+            $activity->data_baru = null;
+        }
     }
 
     /**
@@ -43,7 +60,6 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];

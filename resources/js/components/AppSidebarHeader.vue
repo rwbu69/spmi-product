@@ -22,13 +22,26 @@ const markAllRead = () => {
     router.post('/notifications/read-all', {}, { preserveScroll: true, preserveState: true });
 };
 
+const resolveNotificationUrl = (notif: any) => {
+    if (notif.link) {
+        return notif.link;
+    }
+
+    if (typeof notif.route_name === 'string' && notif.route_name.startsWith('/')) {
+        return notif.route_name;
+    }
+
+    return null;
+};
+
 const openNotification = (notif: any) => {
     router.post('/notifications/read', { id: notif.id }, {
         preserveScroll: true,
         preserveState: true,
         onSuccess: () => {
-            if (notif.link) {
-                router.visit(notif.link);
+            const url = resolveNotificationUrl(notif);
+            if (url) {
+                router.visit(url);
             }
         },
     });

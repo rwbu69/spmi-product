@@ -85,7 +85,12 @@ class RekapDeskEvalController extends Controller
         // Load top-level standar mutu with recursive children and indikator
         $standarList = StandarMutu::where('lembaga_akreditasi_id', $lembagaId)
             ->whereNull('parent_id')
-            ->with(['childrenRecursive.indikator', 'indikator'])
+            ->with([
+                'indikator',
+                'childrenRecursive.indikator',
+                'childrenRecursive.childrenRecursive.indikator',
+                'childrenRecursive.childrenRecursive.childrenRecursive.indikator'
+            ])
             ->orderBy('kode')
             ->get();
 
@@ -114,7 +119,12 @@ class RekapDeskEvalController extends Controller
     public function standarDetail(Request $request, $lembagaId, $standarId): Response
     {
         $lembaga = LembagaAkreditasi::findOrFail($lembagaId);
-        $standar = StandarMutu::with(['childrenRecursive.indikator', 'indikator'])
+        $standar = StandarMutu::with([
+            'indikator',
+            'childrenRecursive.indikator',
+            'childrenRecursive.childrenRecursive.indikator',
+            'childrenRecursive.childrenRecursive.childrenRecursive.indikator'
+        ])
             ->findOrFail($standarId);
 
         $periode = PengaturanPeriode::with('tahunPeriode')

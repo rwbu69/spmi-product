@@ -124,7 +124,7 @@ const getStatusBadge = (s: string) => ({
                             Jadwal Evaluasi Diri sudah berlangsung pada tanggal
                             <strong>{{ alert.mulai }}</strong> sampai dengan
                             <strong>{{ alert.selesai }}</strong> dan sudah lewat selama
-                            <strong>{{ alert.hari_lewat }}</strong> hari.
+                            <strong>{{ Math.abs(alert.hari_lewat) }}</strong> hari.
                         </template>
                         <template v-else-if="alert.is_active">
                             Jadwal Evaluasi Diri sedang berlangsung dari tanggal
@@ -210,6 +210,7 @@ const getStatusBadge = (s: string) => ({
                     <option value="">Pilih Periode</option>
                     <option v-for="p in periodeList" :key="p.id" :value="p.id">{{ p.label }}</option>
                 </select>
+                <p v-if="form.errors.pengaturan_periode_id" class="text-xs text-red-500 mt-1">{{ form.errors.pengaturan_periode_id }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Auditee <span class="text-red-500">*</span></label>
@@ -217,6 +218,7 @@ const getStatusBadge = (s: string) => ({
                     <option value="">Pilih Auditee</option>
                     <option v-for="a in auditeeList" :key="a.id" :value="a.id">{{ a.nama_auditee }}</option>
                 </select>
+                <p v-if="form.errors.auditee_id" class="text-xs text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium mb-1">Status</label>
@@ -225,6 +227,7 @@ const getStatusBadge = (s: string) => ({
                     <option value="Submitted">Submitted</option>
                     <option value="Approved">Approved</option>
                 </select>
+                <p v-if="form.errors.status" class="text-xs text-red-500 mt-1">{{ form.errors.status }}</p>
             </div>
             <div class="flex justify-end gap-3 pt-2">
                 <button type="button" class="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50" @click="showForm = false">Batal</button>

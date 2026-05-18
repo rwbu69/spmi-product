@@ -279,7 +279,7 @@ const allUsers = computed(() => {
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     <tr v-if="filteredData.length === 0">
-                        <td colspan="8" class="px-4 py-12 text-center text-gray-400 italic">No data available in table</td>
+                        <td colspan="8" class="px-4 py-12 text-center text-gray-400 italic">Tidak ada data tersedia</td>
                     </tr>
                     <tr v-for="(item, idx) in filteredData" :key="item.id" class="hover:bg-gray-50 transition">
                         <td class="px-4 py-3 text-gray-500">{{ (data.current_page - 1) * data.per_page + idx + 1 }}</td>
@@ -319,10 +319,13 @@ const allUsers = computed(() => {
 
             <div class="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right">Jenis Dokumen</label>
-                <select v-model="form.jenis_dokumen_id" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
-                    <option value="">-- PILIH --</option>
-                    <option v-for="j in filteredJenisList" :key="j.id" :value="j.id">{{ j.nama_jenis }}</option>
-                </select>
+                <div class="w-full">
+                    <select v-model="form.jenis_dokumen_id" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none">
+                        <option value="">-- PILIH --</option>
+                        <option v-for="j in filteredJenisList" :key="j.id" :value="j.id">{{ j.nama_jenis }}</option>
+                    </select>
+                    <p v-if="form.errors.jenis_dokumen_id" class="text-xs text-red-500 mt-1">{{ form.errors.jenis_dokumen_id }}</p>
+                </div>
             </div>
 
             <div class="grid grid-cols-[140px_1fr] items-start gap-x-4 gap-y-1 py-3 border-b">
@@ -363,41 +366,53 @@ const allUsers = computed(() => {
                         </ul>
                     </div>
                     <p class="mt-1 text-[11px] text-gray-500">*Pilih SEMUA untuk dokumen yang diploting ke semua Auditee</p>
+                    <p v-if="form.errors.penerima_type" class="text-xs text-red-500 mt-1">{{ form.errors.penerima_type }}</p>
+                    <p v-if="form.errors.auditee_id" class="text-xs text-red-500 mt-1">{{ form.errors.auditee_id }}</p>
+                    <p v-if="form.errors.unit_penunjang_id" class="text-xs text-red-500 mt-1">{{ form.errors.unit_penunjang_id }}</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right">Nama Dokumen</label>
-                <div class="relative">
-                    <input v-model="form.nama_dokumen" type="text" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none pr-6" />
-                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 text-sm">*</span>
+                <div class="w-full">
+                    <div class="relative">
+                        <input v-model="form.nama_dokumen" type="text" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none pr-6" />
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 text-sm">*</span>
+                    </div>
+                    <p v-if="form.errors.nama_dokumen" class="text-xs text-red-500 mt-1">{{ form.errors.nama_dokumen }}</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-[140px_1fr] items-center gap-x-4 gap-y-3 py-3 border-b">
                 <label class="text-sm font-medium text-gray-600 text-right">Tahun</label>
-                <div class="relative w-32">
-                    <input v-model="form.tahun" type="number" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none pr-6" />
-                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 text-sm">*</span>
+                <div class="w-full">
+                    <div class="relative w-32">
+                        <input v-model="form.tahun" type="number" class="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none pr-6" />
+                        <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-red-500 text-sm">*</span>
+                    </div>
+                    <p v-if="form.errors.tahun" class="text-xs text-red-500 mt-1">{{ form.errors.tahun }}</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-[140px_1fr] items-start gap-x-4 gap-y-1 py-3">
                 <label class="text-sm font-medium text-gray-600 text-right mt-1.5">File</label>
-                <div class="relative">
-                    <input
-                        type="file"
-                        accept="application/pdf"
-                        class="block w-full text-sm text-gray-500
-                            file:mr-3 file:py-1.5 file:px-3
-                            file:rounded file:border file:border-gray-300
-                            file:text-sm file:font-medium file:bg-white file:text-gray-700
-                            hover:file:bg-gray-50 cursor-pointer"
-                        @input="form.file = ($event.target as HTMLInputElement).files?.[0] || null"
-                    />
-                    <span class="absolute -right-4 top-1.5 text-red-500 text-sm">*</span>
+                <div class="w-full">
+                    <div class="relative">
+                        <input
+                            type="file"
+                            accept="application/pdf"
+                            class="block w-full text-sm text-gray-500
+                                file:mr-3 file:py-1.5 file:px-3
+                                file:rounded file:border file:border-gray-300
+                                file:text-sm file:font-medium file:bg-white file:text-gray-700
+                                hover:file:bg-gray-50 cursor-pointer"
+                            @input="form.file = ($event.target as HTMLInputElement).files?.[0] || null"
+                        />
+                        <span class="absolute -right-4 top-1.5 text-red-500 text-sm">*</span>
+                    </div>
                     <p class="mt-1.5 text-[11px] text-gray-500">* file berupa .PDF, ukuran maksimal 7 MB</p>
                     <p v-if="editTarget" class="text-[10px] text-gray-400 mt-0.5 italic">Kosongkan jika tidak ingin mengganti file.</p>
+                    <p v-if="form.errors.file" class="text-xs text-red-500 mt-1">{{ form.errors.file }}</p>
                 </div>
             </div>
 

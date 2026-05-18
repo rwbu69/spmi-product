@@ -95,21 +95,30 @@ class BerandaController extends Controller
 
         $periodeIds = $periodeQuery->pluck('id');
 
+        $user = auth()->user();
+        $auditeeId = $user?->auditee_id;
+        $unitId = $user?->unit_penunjang_id;
+
         // Stats
         $targetNilai = TargetNilaiMutu::when($periodeIds->isNotEmpty(), fn ($q) => $q->whereIn('pengaturan_periode_id', $periodeIds))
+            ->when($auditeeId, fn ($q) => $q->where('auditee_id', $auditeeId))
+            ->when($unitId && \Illuminate\Support\Facades\Schema::hasColumn('target_nilai_mutu', 'unit_penunjang_id'), fn ($q) => $q->where('unit_penunjang_id', $unitId))
             ->avg('target_nilai');
 
         $nilaiEvaluasiDiri = EvaluasiDiri::when($periodeIds->isNotEmpty(), fn ($q) => $q->whereIn('pengaturan_periode_id', $periodeIds))
+            ->when($auditeeId, fn ($q) => $q->where('auditee_id', $auditeeId))
             ->avg('nilai_evaluasi');
 
         $nilaiHasilAudit = NilaiMutu::when($periodeIds->isNotEmpty(), fn ($q) => $q->whereHas('pengaturanPeriode', fn ($q2) => $q2->whereIn('id', $periodeIds)))
             ->when($filterLembaga, fn ($q) => $q->where('lembaga_akreditasi_id', $filterLembaga))
+            ->when($auditeeId, fn ($q) => $q->where('auditee_id', $auditeeId))
             ->avg('nilai');
 
         // Chart: Nilai per lembaga akreditasi (NilaiMutu has no standar_mutu_id column)
         $chartData = NilaiMutu::with('lembagaAkreditasi')
             ->when($periodeIds->isNotEmpty(), fn ($q) => $q->whereHas('pengaturanPeriode', fn ($q2) => $q2->whereIn('id', $periodeIds)))
             ->when($filterLembaga, fn ($q) => $q->where('lembaga_akreditasi_id', $filterLembaga))
+            ->when($auditeeId, fn ($q) => $q->where('auditee_id', $auditeeId))
             ->get()
             ->groupBy('lembaga_akreditasi_id')
             ->map(fn ($group) => [

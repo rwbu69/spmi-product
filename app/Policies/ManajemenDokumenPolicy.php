@@ -14,23 +14,7 @@ class ManajemenDokumenPolicy
 
     public function view(User $user, ManajemenDokumen $manajemenDokumen): bool
     {
-        if ($user->hasAnyRole(['Admin', 'Fakultas'])) {
-            return true;
-        }
-
-        if ($manajemenDokumen->user_id === $user->id) {
-            return true;
-        }
-
-        if ($manajemenDokumen->auditee_id && $user->auditee_id === $manajemenDokumen->auditee_id) {
-            return true;
-        }
-
-        if ($manajemenDokumen->unit_penunjang_id && $user->unit_penunjang_id === $manajemenDokumen->unit_penunjang_id) {
-            return true;
-        }
-
-        return $manajemenDokumen->auditee_id === null && $manajemenDokumen->unit_penunjang_id === null;
+        return $this->viewAny($user);
     }
 
     public function create(User $user): bool

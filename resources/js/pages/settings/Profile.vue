@@ -9,10 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { edit } from '@/routes/profile';
-import { send } from '@/routes/verification';
 
 type Props = {
-    mustVerifyEmail: boolean;
     status?: string;
 };
 
@@ -42,7 +40,7 @@ const user = computed(() => page.props.auth.user);
         <Heading
             variant="small"
             title="Informasi Profil"
-            description="Perbarui nama dan alamat email Anda"
+            description="Perbarui nama profil Anda"
         />
 
         <Form
@@ -62,41 +60,6 @@ const user = computed(() => page.props.auth.user);
                     placeholder="Nama lengkap"
                 />
                 <InputError class="mt-2" :message="errors.name" />
-            </div>
-
-            <div class="grid gap-2">
-                <Label for="email">Alamat Email</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    class="mt-1 block w-full"
-                    name="email"
-                    :default-value="user.email"
-                    required
-                    autocomplete="username"
-                    placeholder="Alamat email"
-                />
-                <InputError class="mt-2" :message="errors.email" />
-            </div>
-
-            <div v-if="mustVerifyEmail && !user.email_verified_at">
-                <p class="-mt-4 text-sm text-muted-foreground">
-                    Email Anda belum terverifikasi.
-                    <Link
-                        :href="send()"
-                        as="button"
-                        class="text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500"
-                    >
-                        Klik di sini untuk mengirim ulang email verifikasi.
-                    </Link>
-                </p>
-
-                <div
-                    v-if="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
-                >
-                    Tautan verifikasi baru telah dikirim ke alamat email Anda.
-                </div>
             </div>
 
             <div class="flex items-center gap-4">
