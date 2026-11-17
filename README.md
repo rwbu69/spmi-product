@@ -77,7 +77,7 @@ php artisan migrate:fresh --seed
 ```
 
 Data kredensial bawaan yang dihasilkan oleh *seeder* untuk keperluan pengujian lokal adalah:
-- **Username:** `superadmin`
+- **Username:** `admin`
 - **Password:** `password`
 
 ## Menjalankan Aplikasi
