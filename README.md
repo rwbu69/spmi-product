@@ -2,29 +2,43 @@
 
 Dokumentasi ini berisi panduan teknis langkah demi langkah untuk melakukan instalasi dan menjalankan proyek eSPMI secara lokal di lingkungan pengembangan berbasis Windows.
 
-## Prasyarat Sistem & Instalasi via Chocolatey
+## Prasyarat Sistem & Instalasi Dependensi
 
-Untuk memudahkan instalasi dependensi di sistem operasi Windows, kami merekomendasikan penggunaan **Chocolatey** (Package Manager untuk Windows).
+Untuk memudahkan instalasi dan pengelolaan versi dependensi di sistem operasi Windows (terutama mengunci versi **PHP 8.4**), kami merekomendasikan penggunaan **Scoop** (Package Manager untuk Windows).
 
-### 1. Instalasi Chocolatey
-Buka PowerShell sebagai Administrator (Run as Administrator) dan jalankan perintah berikut:
+### 1. Instalasi Scoop
+Buka PowerShell (tanpa perlu Administrator) dan jalankan perintah berikut:
 ```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Invoke-RestMethod -Uri [https://get.scoop.sh](https://get.scoop.sh) | Invoke-Expression
 ```
 
-### 2. Instalasi Dependensi (PHP, Composer, Node.js, MariaDB)
-Setelah Chocolatey terinstal, Anda dapat menginstal semua perangkat lunak yang dibutuhkan eSPMI dengan satu baris perintah. Masih di PowerShell Administrator, ketik:
+### 2. Instalasi Dependensi (PHP 8.4, Composer, Node.js, MariaDB)
+Setelah Scoop terinstal, tambahkan *bucket* `versions` untuk mengakses paket PHP 8.4, lalu instal seluruh perangkat lunak yang dibutuhkan eSPMI:
 ```powershell
-choco install php composer nodejs mariadb -y
+scoop bucket add versions
+scoop install versions/php84 composer nodejs mariadb
+scoop reset php84
 ```
-*(Catatan: Setelah proses instalasi selesai, pastikan Anda merestart terminal/PowerShell agar seluruh perintah baru dikenali oleh sistem).*
+*(Catatan: Jika Anda tetap menggunakan **Chocolatey** di PowerShell Administrator, gunakan `choco install php --version=8.4.27 -y` lalu instal `composer nodejs mariadb` agar versi PHP tidak otomatis terpasang ke 8.5+).*
+
+### 3. Konfigurasi Ekstensi PHP (`php.ini`)
+Agar Laravel dapat terhubung ke database MariaDB tanpa error `could not find driver`, aktifkan file `php.ini` dan ekstensi yang diperlukan dengan menjalankan perintah berikut di PowerShell:
+```powershell
+$ini = "$env:USERPROFILE\scoop\apps\php84\current\php.ini"
+Copy-Item "$env:USERPROFILE\scoop\apps\php84\current\php.ini-development" $ini
+(Get-Content $ini) -replace '^;\s*extension_dir\s*=\s*"ext"', 'extension_dir = "ext"' `
+                   -replace '^;\s*extension=(curl|fileinfo|mbstring|openssl|pdo_mysql|mysqli|pdo_sqlite|zip)\b', 'extension=$1' |
+  Set-Content $ini
+```
+*(Pastikan versi dan ekstensi sudah aktif dengan menjalankan `php -v` untuk melihat versi `PHP 8.4.x`, serta `php -m` untuk memastikan `pdo_mysql` terdaftar).*
 
 ## Langkah Instalasi Proyek
 
 1. **Kloning Repositori**
 Kloning repositori ini ke dalam direktori lokal Anda dan masuk ke dalam folder proyek.
 ```bash
-git clone https://github.com/rwbu69/spmi-product.git
+git clone [https://github.com/rwbu69/spmi-product.git](https://github.com/rwbu69/spmi-product.git)
 cd spmi-product
 ```
 
@@ -56,7 +70,7 @@ php artisan key:generate
 ```
 
 3. **Pengaturan Koneksi Database (MariaDB)**
-Buka file `.env` di code editor Anda. Cari blok yang mengatur database dan ubah `DB_CONNECTION` menjadi `mariadb` (karena kita menggunakan MariaDB dari instalasi choco). Sesuaikan nama database, username, dan password-nya.
+Buka file `.env` di code editor Anda. Cari blok yang mengatur database dan ubah `DB_CONNECTION` menjadi `mariadb`. Sesuaikan nama database, username, dan password-nya.
 
 ```env
 DB_CONNECTION=mariadb
@@ -66,7 +80,7 @@ DB_DATABASE=spmi_project
 DB_USERNAME=root
 DB_PASSWORD=
 ```
-*(Pastikan Anda telah membuat database kosong bernama `spmi_project` di MariaDB melalui klien manajemen database atau command line).*
+*(Pastikan layanan MariaDB sudah berjalan dan Anda telah membuat database kosong bernama `spmi_project` melalui klien manajemen database atau command line).*
 
 ## Migrasi dan Seeding Database
 
